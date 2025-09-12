@@ -1,0 +1,38 @@
+# Cloud Build configuration para Cloud Run
+steps:
+  # Construir la imagen Docker
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/data-science-index:$COMMIT_SHA', '.']
+  
+  # Subir la imagen al Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/data-science-index:$COMMIT_SHA']
+  
+  # Desplegar en Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'data-science-index'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/data-science-index:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '2'
+      - '--max-instances'
+      - '10'
+
+# Opciones de build
+options:
+  machineType: 'E2_HIGHCPU_8'
+  diskSizeGb: 100
+  logging: CLOUD_LOGGING_ONLY
