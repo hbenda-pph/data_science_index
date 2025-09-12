@@ -24,6 +24,7 @@ STREAMLIT_CONFIG = {
 APP_CONFIG = {
     "title": "Data Science Index",
     "subtitle": "Portafolio de Análisis Predictivo y Ciencia de Datos",
+    "page_icon": "📊",
     "admin_password": os.getenv("ADMIN_PASSWORD", "admin123"),  # Cambiar en producción
     "max_image_size": 5 * 1024 * 1024,  # 5MB
     "allowed_image_types": ["jpg", "jpeg", "png", "gif"]
