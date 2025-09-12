@@ -10,8 +10,8 @@ git checkout -b develop
 echo "✅ Rama 'develop' creada para Desarrollo"
 
 # Crear rama de calidad
-git checkout -b qa
-echo "✅ Rama 'qa' creada para Calidad"
+git checkout -b quality
+echo "✅ Rama 'quality' creada para Calidad"
 
 # Volver a main (Productivo)
 git checkout main
@@ -25,7 +25,7 @@ git branch -a
 echo ""
 echo "🎯 Flujo de trabajo recomendado:"
 echo "   main    → Productivo (Cloud Run)"
-echo "   qa      → Calidad (Testing)"
+echo "   quality → Calidad (Testing)"
 echo "   develop → Desarrollo (Local/Dev)"
 echo ""
 echo "✅ Configuración de ramas completada!"

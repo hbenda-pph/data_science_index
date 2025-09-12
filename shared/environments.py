@@ -7,7 +7,7 @@ from typing import Dict
 class EnvironmentConfig:
     """Configuración específica por entorno"""
     
-    def __init__(self, environment: str = "development"):
+    def __init__(self, environment: str = "dev"):
         self.environment = environment
         self.config = self._get_environment_config()
     
@@ -20,7 +20,7 @@ class EnvironmentConfig:
             "log_level": "INFO"
         }
         
-        if self.environment == "development":
+        if self.environment == "dev":
             return {
                 **base_config,
                 "debug": True,
@@ -32,24 +32,24 @@ class EnvironmentConfig:
                 "streamlit_host": "localhost"
             }
         
-        elif self.environment == "qa":
+        elif self.environment == "qua":
             return {
                 **base_config,
                 "debug": False,
                 "log_level": "INFO",
-                "bigquery_project": "platform-partners-des",
+                "bigquery_project": "platform-partners-qua",
                 "bigquery_dataset": "settings",
-                "bigquery_table": "works_index_qa",  # Tabla separada para QA
+                "bigquery_table": "works_index", 
                 "streamlit_port": 8502,
                 "streamlit_host": "0.0.0.0"
             }
         
-        elif self.environment == "production":
+        elif self.environment == "pro":
             return {
                 **base_config,
                 "debug": False,
                 "log_level": "WARNING",
-                "bigquery_project": "platform-partners-des",
+                "bigquery_project": "platform-partners-pro",
                 "bigquery_dataset": "settings",
                 "bigquery_table": "works_index",
                 "streamlit_port": 8080,
@@ -76,6 +76,6 @@ class EnvironmentConfig:
 def get_config(environment: str = None) -> EnvironmentConfig:
     """Obtener configuración del entorno actual"""
     if environment is None:
-        environment = os.getenv("ENVIRONMENT", "development")
+        environment = os.getenv("ENVIRONMENT", "dev")
     
     return EnvironmentConfig(environment)
