@@ -23,6 +23,12 @@ st.set_page_config(
 def main():
     """Función principal del índice"""
     
+    # Detectar si se quiere acceder al admin
+    query_params = st.query_params
+    if "admin" in query_params:
+        show_admin_interface()
+        return
+    
     # Header
     st.title(APP_CONFIG["title"])
     st.markdown(f"*{APP_CONFIG['subtitle']}*")
@@ -111,6 +117,18 @@ def show_work_card(work):
             st.rerun()
         
         st.divider()
+
+def show_admin_interface():
+    """Mostrar interfaz de administración"""
+    import sys
+    import os
+    
+    # Agregar el directorio admin al path
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'admin'))
+    
+    # Importar y ejecutar el admin
+    from admin_main import main as admin_main
+    admin_main()
 
 if __name__ == "__main__":
     main()
