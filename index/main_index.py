@@ -25,7 +25,12 @@ def main():
     
     # Detectar si se quiere acceder al admin
     query_params = st.query_params
+    
+    # Debug temporal
+    st.write("DEBUG - Query params:", dict(query_params))
+    
     if "admin" in query_params:
+        st.write("DEBUG - Accediendo al admin...")
         show_admin_interface()
         return
     
