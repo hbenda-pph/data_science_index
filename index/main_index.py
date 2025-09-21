@@ -237,33 +237,53 @@ def show_work(work_id: str):
             try:
                 # Construir la ruta completa del archivo
                 if streamlit_page.startswith('../'):
-                    # Ruta relativa (para trabajos fuera del directorio categories)
-                    file_path = os.path.join(os.path.dirname(__file__), '..', streamlit_page)
+                    # Ruta relativa (para trabajos fuera del directorio data_science_index)
+                    # Remover el '../' y construir desde el directorio padre de data_science_index
+                    relative_path = streamlit_page[3:]  # Remover '../'
+                    file_path = os.path.join(os.path.dirname(__file__), '..', '..', relative_path)
                 else:
                     # Ruta relativa desde categories
                     file_path = os.path.join(os.path.dirname(__file__), '..', streamlit_page)
                 
+                # Debug: mostrar información de rutas
+                st.info(f"🔍 **Debug de rutas:**")
+                st.info(f"📁 Streamlit page configurado: `{streamlit_page}`")
+                st.info(f"📂 Ruta construida: `{file_path}`")
+                st.info(f"📂 Ruta absoluta: `{os.path.abspath(file_path)}`")
+                
                 # Verificar si el archivo existe
                 if os.path.exists(file_path):
-                    # Ejecutar el archivo Streamlit
-                    import subprocess
-                    import sys
+                    st.success("✅ Archivo encontrado!")
                     
-                    st.info(f"📁 Ejecutando: {streamlit_page}")
-                    
-                    # Aquí podrías ejecutar el archivo, pero Streamlit no permite ejecutar otros archivos
-                    # desde dentro de una aplicación. En su lugar, mostraremos información sobre el archivo.
-                    st.info("🚧 La ejecución de archivos Streamlit desde el índice requiere una implementación más avanzada.")
-                    st.info(f"📂 Archivo encontrado: {file_path}")
+                    # Mostrar información del archivo
+                    file_size = os.path.getsize(file_path)
+                    st.info(f"📊 Tamaño del archivo: {file_size} bytes")
                     
                     # Mostrar contenido del archivo como ejemplo
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                        st.code(content[:500] + "..." if len(content) > 500 else content, language='python')
+                    try:
+                        with open(file_path, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            st.markdown("**📄 Contenido del archivo:**")
+                            st.code(content[:1000] + "..." if len(content) > 1000 else content, language='python')
+                    except Exception as e:
+                        st.error(f"❌ Error al leer el archivo: {str(e)}")
                         
                 else:
                     st.error(f"❌ Archivo no encontrado: {file_path}")
-                    st.info("Verifique la ruta del archivo en la configuración del trabajo.")
+                    st.info("**🔍 Verificando rutas alternativas:**")
+                    
+                    # Probar rutas alternativas
+                    alternative_paths = [
+                        os.path.join(os.path.dirname(__file__), '..', streamlit_page),
+                        os.path.join(os.path.dirname(__file__), '..', '..', streamlit_page[3:]),
+                        os.path.join(os.path.dirname(__file__), '..', '..', '..', streamlit_page[3:])
+                    ]
+                    
+                    for i, alt_path in enumerate(alternative_paths):
+                        if os.path.exists(alt_path):
+                            st.success(f"✅ Ruta alternativa {i+1} funciona: `{alt_path}`")
+                        else:
+                            st.info(f"❌ Ruta alternativa {i+1} no existe: `{alt_path}`")
                     
             except Exception as e:
                 st.error(f"❌ Error al ejecutar el trabajo: {str(e)}")
