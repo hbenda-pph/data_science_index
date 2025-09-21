@@ -24,6 +24,13 @@ st.set_page_config(
 def main():
     """Función principal del índice"""
     
+    # Verificar si se quiere ver un trabajo específico
+    query_params = st.query_params
+    if "work" in query_params:
+        work_id = query_params["work"]
+        show_work(work_id)
+        return
+    
     # Header
     st.title(APP_CONFIG["title"])
     st.markdown(f"*{APP_CONFIG['subtitle']}*")
@@ -136,10 +143,94 @@ def show_work_card(work):
         
         # Botón para ver trabajo
         if st.button(f"Ver Trabajo", key=f"view_{work['work_id']}"):
-            st.session_state['selected_work'] = work['work_id']
-            st.info(f"🚧 Navegación a trabajo '{work['work_name']}' pendiente de implementar")
+            # Navegar usando parámetros de consulta
+            st.query_params.work = work['work_id']
+            st.rerun()
         
         st.divider()
+
+def show_work(work_id: str):
+    """Mostrar y ejecutar un trabajo específico"""
+    try:
+        db = WorksDatabase()
+        work_data = db.get_work_by_id(work_id)
+        
+        if not work_data:
+            st.error(f"❌ Trabajo con ID '{work_id}' no encontrado")
+            st.info("🔙 [Volver al Índice](?)")
+            return
+        
+        # Header del trabajo
+        st.title(f"📊 {work_data['work_name']}")
+        
+        # Información del trabajo
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("Versión", work_data['version'])
+        
+        with col2:
+            st.metric("Estado", get_status_badge(work_data['status']))
+        
+        with col3:
+            st.metric("Creado", format_date(work_data['created_date']))
+        
+        # Descripción
+        if work_data.get('description'):
+            st.markdown("### 📝 Descripción")
+            st.write(work_data['description'])
+        
+        # Botón para volver al índice
+        if st.button("🔙 Volver al Índice"):
+            st.query_params.clear()
+            st.rerun()
+        
+        st.divider()
+        
+        # Ejecutar el archivo Streamlit del trabajo
+        streamlit_page = work_data.get('streamlit_page')
+        if streamlit_page:
+            st.markdown("### 🚀 Ejecutando Trabajo")
+            
+            try:
+                # Construir la ruta completa del archivo
+                if streamlit_page.startswith('../'):
+                    # Ruta relativa (para trabajos fuera del directorio categories)
+                    file_path = os.path.join(os.path.dirname(__file__), '..', streamlit_page)
+                else:
+                    # Ruta relativa desde categories
+                    file_path = os.path.join(os.path.dirname(__file__), '..', streamlit_page)
+                
+                # Verificar si el archivo existe
+                if os.path.exists(file_path):
+                    # Ejecutar el archivo Streamlit
+                    import subprocess
+                    import sys
+                    
+                    st.info(f"📁 Ejecutando: {streamlit_page}")
+                    
+                    # Aquí podrías ejecutar el archivo, pero Streamlit no permite ejecutar otros archivos
+                    # desde dentro de una aplicación. En su lugar, mostraremos información sobre el archivo.
+                    st.info("🚧 La ejecución de archivos Streamlit desde el índice requiere una implementación más avanzada.")
+                    st.info(f"📂 Archivo encontrado: {file_path}")
+                    
+                    # Mostrar contenido del archivo como ejemplo
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                        st.code(content[:500] + "..." if len(content) > 500 else content, language='python')
+                        
+                else:
+                    st.error(f"❌ Archivo no encontrado: {file_path}")
+                    st.info("Verifique la ruta del archivo en la configuración del trabajo.")
+                    
+            except Exception as e:
+                st.error(f"❌ Error al ejecutar el trabajo: {str(e)}")
+        else:
+            st.warning("⚠️ No se especificó archivo Streamlit para este trabajo.")
+    
+    except Exception as e:
+        st.error(f"❌ Error al cargar el trabajo: {str(e)}")
+        st.info("🔙 [Volver al Índice](?)")
 
 if __name__ == "__main__":
     main()
