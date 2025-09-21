@@ -16,16 +16,25 @@ def generate_work_id(name: str) -> str:
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     return f"{slug}-{timestamp}"
 
-def format_date(date_str: str) -> str:
+def format_date(date_input) -> str:
     """Formatear fecha para mostrar en la interfaz"""
-    if not date_str:
+    if not date_input:
         return "N/A"
     
     try:
-        date_obj = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-        return date_obj.strftime("%d/%m/%Y %H:%M")
+        # Si es un Timestamp de pandas
+        if hasattr(date_input, 'strftime'):
+            return date_input.strftime("%d/%m/%Y %H:%M")
+        
+        # Si es un string
+        if isinstance(date_input, str):
+            date_obj = datetime.fromisoformat(date_input.replace('Z', '+00:00'))
+            return date_obj.strftime("%d/%m/%Y %H:%M")
+        
+        # Si es otro tipo, convertir a string
+        return str(date_input)
     except:
-        return date_str
+        return str(date_input) if date_input else "N/A"
 
 def get_status_badge(status: str) -> str:
     """Obtener emoji para el estado del trabajo"""

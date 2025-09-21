@@ -31,10 +31,13 @@ def main():
         show_work(work_id)
         return
     
-    # Header
-    st.title(APP_CONFIG["title"])
-    st.markdown(f"*{APP_CONFIG['subtitle']}*")
-    st.divider()
+    # Header mejorado
+    st.markdown("""
+    <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin-bottom: 30px;">
+        <h1 style="color: white; margin: 0; font-size: 2.5rem;">📊 Data Science Index</h1>
+        <p style="color: #f0f0f0; margin: 10px 0 0 0; font-size: 1.2rem;">Portafolio de Análisis Predictivo y Ciencia de Datos</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Inicializar base de datos
     try:
@@ -78,76 +81,109 @@ def main():
         else:
             st.subheader(f"📊 Trabajos encontrados: {len(works_df)}")
             
-            # Mostrar trabajos en grid
-            cols = st.columns(3)
+            # Mostrar trabajos en tabla horizontal (estilo Kaggle)
             for idx, (_, work) in enumerate(works_df.iterrows()):
-                with cols[idx % 3]:
-                    show_work_card(work)
+                show_work_card_horizontal(work)
     
     except Exception as e:
         st.error(f"Error al cargar los trabajos: {str(e)}")
         st.info("Verifique la conexión a BigQuery y las credenciales.")
 
-def show_work_card(work):
-    """Mostrar tarjeta de trabajo"""
-    with st.container():
-        # Header de la tarjeta
-        col1, col2 = st.columns([3, 1])
+def show_work_card_horizontal(work):
+    """Mostrar tarjeta de trabajo en formato horizontal estilo Kaggle"""
+    
+    # Obtener información de categoría
+    try:
+        db = WorksDatabase()
+        categories_table_ref = f"{db.project_id}.{db.dataset_id}.works_categories"
+        category_query = f"""
+        SELECT category_name, category_icon, description as category_description
+        FROM `{categories_table_ref}`
+        WHERE category_id = @category_id AND is_active = true
+        """
         
-        with col1:
-            # Obtener nombre de categoría desde works_categories
-            try:
-                db = WorksDatabase()
-                categories_table_ref = f"{db.project_id}.{db.dataset_id}.works_categories"
-                category_query = f"""
-                SELECT category_name, category_icon
-                FROM `{categories_table_ref}`
-                WHERE category_id = @category_id AND is_active = true
-                """
-                
-                job_config = bigquery.QueryJobConfig(
-                    query_parameters=[
-                        bigquery.ScalarQueryParameter("category_id", "STRING", work['category'])
-                    ]
-                )
-                
-                category_result = db.client.query(category_query, job_config=job_config).to_dataframe()
-                
-                if not category_result.empty:
-                    category_name = category_result['category_name'].iloc[0]
-                    category_icon = category_result['category_icon'].iloc[0]
-                else:
-                    category_name = work['category']
-                    category_icon = "📊"
-                    
-            except:
-                category_name = work['category']
-                category_icon = "📊"
+        job_config = bigquery.QueryJobConfig(
+            query_parameters=[
+                bigquery.ScalarQueryParameter("category_id", "STRING", work['category'])
+            ]
+        )
+        
+        category_result = db.client.query(category_query, job_config=job_config).to_dataframe()
+        
+        if not category_result.empty:
+            category_name = category_result['category_name'].iloc[0]
+            category_icon = category_result['category_icon'].iloc[0]
+            category_description = category_result['category_description'].iloc[0]
+        else:
+            category_name = work['category']
+            category_icon = "📊"
+            category_description = ""
             
-            st.markdown(f"**{work['work_name']}**")
-            st.caption(f"{category_icon} {category_name}")
+    except:
+        category_name = work['category']
+        category_icon = "📊"
+        category_description = ""
+    
+    # Contenedor principal con borde y padding
+    with st.container():
+        st.markdown("""
+        <div style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 20px; margin: 10px 0; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        """, unsafe_allow_html=True)
         
-        with col2:
-            st.markdown(f"{get_status_badge(work['status'])}")
+        # Header del trabajo
+        col1, col2, col3 = st.columns([4, 1, 1])
         
-        # Descripción
-        if work['short_description']:
-            st.markdown(f"*{work['short_description']}*")
-        
-        # Metadatos
-        col1, col2 = st.columns(2)
         with col1:
-            st.caption(f"Versión: {work['version']}")
+            # Título principal
+            st.markdown(f"### {work['work_name']}")
+            
+            # Categoría con icono
+            st.markdown(f"**{category_icon} {category_name}**")
+            
+            # Descripción corta
+            if work['short_description']:
+                st.markdown(f"*{work['short_description']}*")
+        
         with col2:
-            st.caption(f"Creado: {format_date(work['created_date'])}")
+            # Estado
+            status_color = {
+                "active": "🟢",
+                "paused": "⏸️",
+                "archived": "📁",
+                "maintenance": "🔧"
+            }.get(work['status'], "❓")
+            
+            st.markdown(f"**Estado:** {status_color} {work['status'].title()}")
+            st.markdown(f"**Versión:** {work['version']}")
         
-        # Botón para ver trabajo
-        if st.button(f"Ver Trabajo", key=f"view_{work['work_id']}"):
-            # Navegar usando parámetros de consulta
-            st.query_params.work = work['work_id']
-            st.rerun()
+        with col3:
+            # Metadatos
+            st.markdown(f"**Creado:** {format_date(work['created_date'])}")
+            
+            # Botón para ver trabajo
+            if st.button(f"🚀 Ver Trabajo", key=f"view_{work['work_id']}", type="primary"):
+                st.query_params.work = work['work_id']
+                st.rerun()
         
-        st.divider()
+        # Descripción completa del trabajo (si existe)
+        if work.get('description'):
+            st.markdown("---")
+            st.markdown("**📝 Descripción:**")
+            st.markdown(work['description'])
+        
+        # Descripción de la categoría (si existe)
+        if category_description:
+            st.markdown("---")
+            st.markdown("**📂 Sobre esta categoría:**")
+            st.markdown(category_description)
+        
+        # Tags o notas (si existen)
+        if work.get('notes'):
+            st.markdown("---")
+            st.markdown("**📌 Notas:**")
+            st.markdown(f"*{work['notes']}*")
+        
+        st.markdown("</div>", unsafe_allow_html=True)
 
 def show_work(work_id: str):
     """Mostrar y ejecutar un trabajo específico"""
@@ -160,20 +196,26 @@ def show_work(work_id: str):
             st.info("🔙 [Volver al Índice](?)")
             return
         
-        # Header del trabajo
-        st.title(f"📊 {work_data['work_name']}")
+        # Header del trabajo mejorado
+        st.markdown(f"""
+        <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin-bottom: 30px;">
+            <h1 style="color: white; margin: 0; font-size: 2.2rem;">📊 {work_data['work_name']}</h1>
+            <p style="color: #f0f0f0; margin: 10px 0 0 0; font-size: 1.1rem;">Versión {work_data['version']} • {get_status_badge(work_data['status'])} {work_data['status'].title()}</p>
+        </div>
+        """, unsafe_allow_html=True)
         
-        # Información del trabajo
+        # Información del trabajo en cards
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.metric("Versión", work_data['version'])
+            st.info(f"📅 **Creado:** {format_date(work_data['created_date'])}")
         
         with col2:
-            st.metric("Estado", get_status_badge(work_data['status']))
+            st.success(f"📊 **Versión:** {work_data['version']}")
         
         with col3:
-            st.metric("Creado", format_date(work_data['created_date']))
+            status_color = "🟢" if work_data['status'] == 'active' else "⏸️" if work_data['status'] == 'paused' else "🔧"
+            st.warning(f"{status_color} **Estado:** {work_data['status'].title()}")
         
         # Descripción
         if work_data.get('description'):
