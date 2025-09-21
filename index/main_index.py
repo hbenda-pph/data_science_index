@@ -245,11 +245,31 @@ def show_work(work_id: str):
                     # Ruta relativa desde categories
                     file_path = os.path.join(os.path.dirname(__file__), '..', streamlit_page)
                 
-                # Debug: mostrar información de rutas
+                # Debug: mostrar información de rutas y estructura
                 st.info(f"🔍 **Debug de rutas:**")
                 st.info(f"📁 Streamlit page configurado: `{streamlit_page}`")
                 st.info(f"📂 Ruta construida: `{file_path}`")
                 st.info(f"📂 Ruta absoluta: `{os.path.abspath(file_path)}`")
+                
+                # Debug: mostrar estructura de directorios
+                st.info("**📁 Estructura de directorios:**")
+                current_dir = os.path.dirname(__file__)
+                st.info(f"📂 Directorio actual: `{current_dir}`")
+                st.info(f"📂 Directorio padre: `{os.path.dirname(current_dir)}`")
+                st.info(f"📂 Directorio abuelo: `{os.path.dirname(os.path.dirname(current_dir))}`")
+                
+                # Listar contenido de directorios relevantes
+                try:
+                    parent_dir = os.path.dirname(os.path.dirname(current_dir))
+                    if os.path.exists(parent_dir):
+                        st.info(f"📂 Contenido de `{parent_dir}`:")
+                        contents = os.listdir(parent_dir)
+                        for item in contents[:10]:  # Mostrar solo los primeros 10
+                            st.info(f"  - {item}")
+                        if len(contents) > 10:
+                            st.info(f"  ... y {len(contents) - 10} más")
+                except Exception as e:
+                    st.error(f"Error listando directorio: {e}")
                 
                 # Verificar si el archivo existe
                 if os.path.exists(file_path):
@@ -276,7 +296,8 @@ def show_work(work_id: str):
                     alternative_paths = [
                         os.path.join(os.path.dirname(__file__), '..', streamlit_page),
                         os.path.join(os.path.dirname(__file__), '..', '..', streamlit_page[3:]),
-                        os.path.join(os.path.dirname(__file__), '..', '..', '..', streamlit_page[3:])
+                        os.path.join(os.path.dirname(__file__), '..', '..', '..', streamlit_page[3:]),
+                        os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', streamlit_page[3:])
                     ]
                     
                     for i, alt_path in enumerate(alternative_paths):
@@ -284,6 +305,31 @@ def show_work(work_id: str):
                             st.success(f"✅ Ruta alternativa {i+1} funciona: `{alt_path}`")
                         else:
                             st.info(f"❌ Ruta alternativa {i+1} no existe: `{alt_path}`")
+                    
+                    # Búsqueda exhaustiva del archivo
+                    st.info("**🔍 Búsqueda exhaustiva del archivo:**")
+                    try:
+                        # Buscar en todo el directorio de trabajo
+                        import os
+                        work_dir = os.getcwd()
+                        st.info(f"📂 Directorio de trabajo: `{work_dir}`")
+                        
+                        # Buscar el archivo dashboard.py
+                        found_files = []
+                        for root, dirs, files in os.walk(work_dir):
+                            for file in files:
+                                if file == "dashboard.py":
+                                    found_files.append(os.path.join(root, file))
+                        
+                        if found_files:
+                            st.success(f"✅ Encontrados {len(found_files)} archivos dashboard.py:")
+                            for i, file in enumerate(found_files):
+                                st.info(f"  {i+1}. `{file}`")
+                        else:
+                            st.warning("⚠️ No se encontró ningún archivo dashboard.py")
+                            
+                    except Exception as e:
+                        st.error(f"Error en búsqueda exhaustiva: {e}")
                     
             except Exception as e:
                 st.error(f"❌ Error al ejecutar el trabajo: {str(e)}")
