@@ -28,20 +28,44 @@ class WorksDatabase:
         """
         return self.client.query(query).to_dataframe()
     
-    def get_works_by_category(self, category: str) -> pd.DataFrame:
+    def get_works_by_category(self, category_name: str) -> pd.DataFrame:
         """Obtener trabajos por categoría"""
-        query = f"""
-        SELECT *
-        FROM `{self.table_ref}`
-        WHERE category = @category AND status = 'active'
-        ORDER BY created_date DESC
+        # Primero obtener el category_id desde works_categories
+        categories_table_ref = f"{self.project_id}.{self.dataset_id}.works_categories"
+        category_query = f"""
+        SELECT category_id
+        FROM `{categories_table_ref}`
+        WHERE category_name = @category_name AND is_active = true
         """
+        
         job_config = bigquery.QueryJobConfig(
             query_parameters=[
-                bigquery.ScalarQueryParameter("category", "STRING", category)
+                bigquery.ScalarQueryParameter("category_name", "STRING", category_name)
             ]
         )
-        return self.client.query(query, job_config=job_config).to_dataframe()
+        
+        category_result = self.client.query(category_query, job_config=job_config).to_dataframe()
+        
+        if category_result.empty:
+            return pd.DataFrame()  # No hay categoría con ese nombre
+        
+        category_id = category_result['category_id'].iloc[0]
+        
+        # Ahora obtener trabajos por category_id
+        works_query = f"""
+        SELECT *
+        FROM `{self.table_ref}`
+        WHERE category = @category_id AND status = 'active'
+        ORDER BY created_date DESC
+        """
+        
+        job_config = bigquery.QueryJobConfig(
+            query_parameters=[
+                bigquery.ScalarQueryParameter("category_id", "STRING", category_id)
+            ]
+        )
+        
+        return self.client.query(works_query, job_config=job_config).to_dataframe()
     
     def get_work_by_id(self, work_id: str) -> Optional[Dict]:
         """Obtener un trabajo específico por ID"""
@@ -60,15 +84,16 @@ class WorksDatabase:
         return result.to_dict('records')[0] if not result.empty else None
     
     def get_categories(self) -> List[str]:
-        """Obtener lista de categorías únicas"""
+        """Obtener lista de categorías únicas desde works_categories"""
+        categories_table_ref = f"{self.project_id}.{self.dataset_id}.works_categories"
         query = f"""
-        SELECT DISTINCT category
-        FROM `{self.table_ref}`
-        WHERE status = 'active'
-        ORDER BY category
+        SELECT category_name
+        FROM `{categories_table_ref}`
+        WHERE is_active = true
+        ORDER BY display_order, category_name
         """
         result = self.client.query(query).to_dataframe()
-        return result['category'].tolist()
+        return result['category_name'].tolist()
     
     def create_work(self, work_data: Dict) -> bool:
         """Crear nuevo trabajo"""

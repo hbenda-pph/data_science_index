@@ -4,6 +4,7 @@
 import streamlit as st
 import sys
 import os
+from google.cloud import bigquery
 
 # Agregar el directorio shared al path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'shared'))
@@ -22,17 +23,6 @@ st.set_page_config(
 
 def main():
     """Función principal del índice"""
-    
-    # Detectar si se quiere acceder al admin
-    query_params = st.query_params
-    
-    # Debug temporal
-    st.write("DEBUG - Query params:", dict(query_params))
-    
-    if "admin" in query_params:
-        st.write("DEBUG - Accediendo al admin...")
-        show_admin_interface()
-        return
     
     # Header
     st.title(APP_CONFIG["title"])
@@ -98,9 +88,37 @@ def show_work_card(work):
         col1, col2 = st.columns([3, 1])
         
         with col1:
-            category_name = CATEGORIES.get(work['category'], work['category'])
+            # Obtener nombre de categoría desde works_categories
+            try:
+                db = WorksDatabase()
+                categories_table_ref = f"{db.project_id}.{db.dataset_id}.works_categories"
+                category_query = f"""
+                SELECT category_name, category_icon
+                FROM `{categories_table_ref}`
+                WHERE category_id = @category_id AND is_active = true
+                """
+                
+                job_config = bigquery.QueryJobConfig(
+                    query_parameters=[
+                        bigquery.ScalarQueryParameter("category_id", "STRING", work['category'])
+                    ]
+                )
+                
+                category_result = db.client.query(category_query, job_config=job_config).to_dataframe()
+                
+                if not category_result.empty:
+                    category_name = category_result['category_name'].iloc[0]
+                    category_icon = category_result['category_icon'].iloc[0]
+                else:
+                    category_name = work['category']
+                    category_icon = "📊"
+                    
+            except:
+                category_name = work['category']
+                category_icon = "📊"
+            
             st.markdown(f"**{work['work_name']}**")
-            st.caption(f"{get_category_icon(work['category'])} {category_name}")
+            st.caption(f"{category_icon} {category_name}")
         
         with col2:
             st.markdown(f"{get_status_badge(work['status'])}")
@@ -119,21 +137,9 @@ def show_work_card(work):
         # Botón para ver trabajo
         if st.button(f"Ver Trabajo", key=f"view_{work['work_id']}"):
             st.session_state['selected_work'] = work['work_id']
-            st.rerun()
+            st.info(f"🚧 Navegación a trabajo '{work['work_name']}' pendiente de implementar")
         
         st.divider()
-
-def show_admin_interface():
-    """Mostrar interfaz de administración"""
-    import sys
-    import os
-    
-    # Agregar el directorio admin al path
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'admin'))
-    
-    # Importar y ejecutar el admin
-    from admin_main import main as admin_main
-    admin_main()
 
 if __name__ == "__main__":
     main()
