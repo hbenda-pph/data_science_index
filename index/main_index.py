@@ -235,28 +235,51 @@ def show_work(work_id: str):
             st.markdown("### 🚀 Ejecutando Trabajo")
             
             try:
-                # Construir la ruta completa del archivo
-                if streamlit_page.startswith('../'):
-                    # En Cloud Run, los archivos están en la raíz del sistema
-                    # Remover el '../' y usar la ruta desde la raíz
-                    relative_path = streamlit_page[3:]  # Remover '../'
-                    file_path = os.path.join('/', relative_path)  # Desde la raíz del sistema
-                else:
-                    # Ruta relativa desde categories
-                    file_path = os.path.join(os.path.dirname(__file__), '..', streamlit_page)
-                
-                # Información básica
+                # SOLUCIÓN ROBUSTA: Buscar el archivo en todas las ubicaciones posibles
                 st.info(f"📁 Ejecutando: `{streamlit_page}`")
                 
-                # Verificar si el archivo existe
-                if os.path.exists(file_path):
-                    st.success("✅ Archivo encontrado!")
+                # Generar todas las rutas posibles
+                possible_paths = []
+                
+                if streamlit_page.startswith('../'):
+                    # Para rutas que empiezan con ../
+                    relative_path = streamlit_page[3:]  # Remover '../'
+                    
+                    # Rutas desde diferentes puntos de partida
+                    possible_paths = [
+                        os.path.join('/', relative_path),  # Desde raíz
+                        os.path.join('/app', relative_path),  # Desde /app
+                        os.path.join(os.getcwd(), relative_path),  # Desde directorio actual
+                        os.path.join(os.path.dirname(__file__), '..', '..', relative_path),  # Desde index/../../
+                        os.path.join(os.path.dirname(__file__), '..', '..', '..', relative_path),  # Desde index/../../../
+                    ]
+                else:
+                    # Para rutas normales
+                    possible_paths = [
+                        os.path.join(os.path.dirname(__file__), '..', streamlit_page),
+                        os.path.join('/', streamlit_page),
+                        os.path.join('/app', streamlit_page),
+                        os.path.join(os.getcwd(), streamlit_page),
+                    ]
+                
+                # Buscar el archivo
+                file_found = False
+                file_path = None
+                
+                for path in possible_paths:
+                    if os.path.exists(path):
+                        file_path = path
+                        file_found = True
+                        break
+                
+                if file_found:
+                    st.success(f"✅ Archivo encontrado en: `{file_path}`")
                     
                     # Mostrar información del archivo
                     file_size = os.path.getsize(file_path)
                     st.info(f"📊 Tamaño del archivo: {file_size} bytes")
                     
-                    # Mostrar contenido del archivo como ejemplo
+                    # Mostrar contenido del archivo
                     try:
                         with open(file_path, 'r', encoding='utf-8') as f:
                             content = f.read()
@@ -266,8 +289,32 @@ def show_work(work_id: str):
                         st.error(f"❌ Error al leer el archivo: {str(e)}")
                         
                 else:
-                    st.error(f"❌ Archivo no encontrado: `{file_path}`")
-                    st.info("Verifique la ruta del archivo en la configuración del trabajo.")
+                    st.error("❌ Archivo no encontrado en ninguna ubicación posible")
+                    st.info("**🔍 Rutas probadas:**")
+                    for i, path in enumerate(possible_paths):
+                        st.info(f"  {i+1}. `{path}`")
+                    
+                    # Búsqueda exhaustiva como último recurso
+                    st.info("**🔍 Búsqueda exhaustiva:**")
+                    try:
+                        found_files = []
+                        for root, dirs, files in os.walk('/'):
+                            for file in files:
+                                if file == os.path.basename(streamlit_page):
+                                    found_files.append(os.path.join(root, file))
+                                    if len(found_files) >= 5:  # Limitar a 5 resultados
+                                        break
+                            if len(found_files) >= 5:
+                                break
+                        
+                        if found_files:
+                            st.success(f"✅ Encontrados {len(found_files)} archivos similares:")
+                            for i, file in enumerate(found_files):
+                                st.info(f"  {i+1}. `{file}`")
+                        else:
+                            st.warning("⚠️ No se encontró ningún archivo similar")
+                    except Exception as e:
+                        st.error(f"Error en búsqueda exhaustiva: {e}")
                     
             except Exception as e:
                 st.error(f"❌ Error al ejecutar el trabajo: {str(e)}")
