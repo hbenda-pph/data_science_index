@@ -237,10 +237,10 @@ def show_work(work_id: str):
             try:
                 # Construir la ruta completa del archivo
                 if streamlit_page.startswith('../'):
-                    # Ruta relativa (para trabajos fuera del directorio data_science_index)
-                    # Remover el '../' y construir desde el directorio padre de data_science_index
+                    # En Cloud Run, los archivos están en la raíz del sistema
+                    # Remover el '../' y usar la ruta desde la raíz
                     relative_path = streamlit_page[3:]  # Remover '../'
-                    file_path = os.path.join(os.path.dirname(__file__), '..', '..', relative_path)
+                    file_path = os.path.join('/', relative_path)  # Desde la raíz del sistema
                 else:
                     # Ruta relativa desde categories
                     file_path = os.path.join(os.path.dirname(__file__), '..', streamlit_page)
@@ -294,6 +294,7 @@ def show_work(work_id: str):
                     
                     # Probar rutas alternativas
                     alternative_paths = [
+                        os.path.join('/', streamlit_page[3:]),  # Desde raíz
                         os.path.join(os.path.dirname(__file__), '..', streamlit_page),
                         os.path.join(os.path.dirname(__file__), '..', '..', streamlit_page[3:]),
                         os.path.join(os.path.dirname(__file__), '..', '..', '..', streamlit_page[3:]),
