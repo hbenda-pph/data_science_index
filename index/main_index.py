@@ -297,22 +297,59 @@ def show_work(work_id: str):
                     # Búsqueda exhaustiva como último recurso
                     st.info("**🔍 Búsqueda exhaustiva:**")
                     try:
+                        # Buscar archivos dashboard.py en todo el sistema
                         found_files = []
-                        for root, dirs, files in os.walk('/'):
-                            for file in files:
-                                if file == os.path.basename(streamlit_page):
-                                    found_files.append(os.path.join(root, file))
-                                    if len(found_files) >= 5:  # Limitar a 5 resultados
-                                        break
-                            if len(found_files) >= 5:
-                                break
+                        st.info("🔍 Buscando archivos 'dashboard.py'...")
+                        
+                        # Buscar en directorios comunes
+                        search_dirs = ['/', '/app', '/tmp', '/home', '/usr', '/opt']
+                        
+                        for search_dir in search_dirs:
+                            if os.path.exists(search_dir):
+                                try:
+                                    for root, dirs, files in os.walk(search_dir):
+                                        for file in files:
+                                            if file == 'dashboard.py':
+                                                found_files.append(os.path.join(root, file))
+                                                if len(found_files) >= 10:  # Limitar resultados
+                                                    break
+                                        if len(found_files) >= 10:
+                                            break
+                                except PermissionError:
+                                    continue  # Saltar directorios sin permisos
+                                except Exception:
+                                    continue
                         
                         if found_files:
-                            st.success(f"✅ Encontrados {len(found_files)} archivos similares:")
+                            st.success(f"✅ Encontrados {len(found_files)} archivos 'dashboard.py':")
                             for i, file in enumerate(found_files):
                                 st.info(f"  {i+1}. `{file}`")
+                                
+                            # Buscar específicamente calls_analysis_dashboard
+                            st.info("🔍 Buscando directorios 'calls_analysis_dashboard'...")
+                            dashboard_dirs = []
+                            for search_dir in search_dirs:
+                                if os.path.exists(search_dir):
+                                    try:
+                                        for root, dirs, files in os.walk(search_dir):
+                                            if 'calls_analysis_dashboard' in dirs:
+                                                dashboard_dirs.append(os.path.join(root, 'calls_analysis_dashboard'))
+                                    except:
+                                        continue
+                            
+                            if dashboard_dirs:
+                                st.success(f"✅ Encontrados {len(dashboard_dirs)} directorios 'calls_analysis_dashboard':")
+                                for i, dir_path in enumerate(dashboard_dirs):
+                                    st.info(f"  {i+1}. `{dir_path}`")
+                                    # Verificar si tiene dashboard.py
+                                    dashboard_file = os.path.join(dir_path, 'dashboard.py')
+                                    if os.path.exists(dashboard_file):
+                                        st.success(f"    ✅ Contiene dashboard.py: `{dashboard_file}`")
+                                    else:
+                                        st.info(f"    ❌ No contiene dashboard.py")
                         else:
-                            st.warning("⚠️ No se encontró ningún archivo similar")
+                            st.warning("⚠️ No se encontró ningún archivo 'dashboard.py'")
+                            
                     except Exception as e:
                         st.error(f"Error en búsqueda exhaustiva: {e}")
                     
