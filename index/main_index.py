@@ -26,6 +26,10 @@ def main():
     
     # Verificar si se quiere ver un trabajo específico
     query_params = st.query_params
+    if "work_url" in query_params:
+        show_external_work(query_params["work_url"])
+        return
+    
     if "work" in query_params:
         work_id = query_params["work"]
         show_work(work_id)
@@ -160,10 +164,14 @@ def show_work_card_horizontal(work):
             # Metadatos
             st.markdown(f"**Creado:** {format_date(work['created_date'])}")
             
-            # Botón para ver trabajo
-            if st.button(f"🚀 Ver Trabajo", key=f"view_{work['work_id']}", type="primary"):
-                st.query_params.work = work['work_id']
+        # Botón para ver trabajo
+        if st.button(f"🚀 Ver Trabajo", key=f"view_{work['work_id']}", type="primary"):
+            work_url = work.get('work_url')
+            if work_url:
+                st.query_params.work_url = work_url
                 st.rerun()
+            else:
+                st.error("❌ No se especificó URL para este trabajo")
         
         # Descripción completa del trabajo (si existe)
         if work.get('description'):
@@ -184,6 +192,40 @@ def show_work_card_horizontal(work):
             st.markdown(f"*{work['notes']}*")
         
         st.markdown("</div>", unsafe_allow_html=True)
+
+def show_external_work(work_url: str):
+    """Mostrar trabajo externo embebido"""
+    
+    # Header con botón de regreso
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown(f"""
+        <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin-bottom: 30px;">
+            <h1 style="color: white; margin: 0; font-size: 2.2rem;">📊 Trabajo Externo</h1>
+            <p style="color: #f0f0f0; margin: 10px 0 0 0; font-size: 1.1rem;">Cargando trabajo desde URL externa...</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        if st.button("🔙 Volver al Índice", type="secondary"):
+            st.query_params.clear()
+            st.rerun()
+    
+    # Mostrar trabajo en iframe
+    try:
+        st.components.v1.iframe(work_url, height=800)
+    except Exception as e:
+        st.error(f"❌ Error al cargar el trabajo: {str(e)}")
+        st.info(f"URL: {work_url}")
+        
+        # Botón alternativo para abrir en nueva ventana
+        st.markdown(f"""
+        <div style="text-align: center; padding: 20px;">
+            <a href="{work_url}" target="_blank" style="font-size: 18px; color: #1f77b4;">
+                🚀 Abrir trabajo en nueva ventana
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
 
 def show_work(work_id: str):
     """Mostrar y ejecutar un trabajo específico"""
