@@ -35,11 +35,112 @@ def main():
         show_work(work_id)
         return
     
+    # CSS personalizado para diseño científico formal
+    st.markdown("""
+    <style>
+    /* Estilos científicos formales */
+    .main .block-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        max-width: 1200px;
+    }
+    
+    /* Header más formal */
+    .scientific-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 30px 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .scientific-header h1 {
+        margin: 0;
+        font-size: 2.2rem;
+        font-weight: 300;
+        letter-spacing: 1px;
+    }
+    
+    .scientific-header p {
+        margin: 10px 0 0 0;
+        font-size: 1rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+    
+    /* Tabla científica */
+    .scientific-table {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .scientific-table th {
+        background-color: #2c3e50;
+        color: white;
+        padding: 15px 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .scientific-table td {
+        padding: 12px;
+        border-bottom: 1px solid #ecf0f1;
+        font-size: 0.9rem;
+    }
+    
+    .scientific-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    /* Botones formales */
+    .scientific-button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .scientific-button:hover {
+        background-color: #2980b9;
+    }
+    
+    /* Cards más formales */
+    .work-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 15px 0;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: box-shadow 0.3s;
+    }
+    
+    .work-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # Header mejorado
     st.markdown("""
-    <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin-bottom: 30px;">
-        <h1 style="color: white; margin: 0; font-size: 2.5rem;">📊 Data Science Index</h1>
-        <p style="color: #f0f0f0; margin: 10px 0 0 0; font-size: 1.2rem;">Portafolio de Análisis Predictivo y Ciencia de Datos</p>
+    <div class="scientific-header">
+        <h1>📊 Data Science Index</h1>
+        <p>Portafolio de Análisis Predictivo y Ciencia de Datos</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -85,13 +186,139 @@ def main():
         else:
             st.subheader(f"📊 Trabajos encontrados: {len(works_df)}")
             
-            # Mostrar trabajos en tabla horizontal (estilo Kaggle)
-            for idx, (_, work) in enumerate(works_df.iterrows()):
-                show_work_card_horizontal(work)
+            # Opción de vista: Tabla o Cards
+            view_option = st.radio("Vista:", ["📋 Tabla", "🎴 Cards"], horizontal=True)
+            
+            if view_option == "📋 Tabla":
+                show_works_table(works_df)
+            else:
+                # Mostrar trabajos en tabla horizontal (estilo Kaggle)
+                for idx, (_, work) in enumerate(works_df.iterrows()):
+                    show_work_card_horizontal(work)
     
     except Exception as e:
         st.error(f"Error al cargar los trabajos: {str(e)}")
         st.info("Verifique la conexión a BigQuery y las credenciales.")
+
+def show_works_table(works_df):
+    """Mostrar trabajos en formato tabla científica"""
+    
+    # Preparar datos para la tabla
+    table_data = []
+    
+    for _, work in works_df.iterrows():
+        # Obtener información de categoría
+        try:
+            db = WorksDatabase()
+            categories_table_ref = f"{db.project_id}.{db.dataset_id}.works_categories"
+            category_query = f"""
+            SELECT category_name, category_icon
+            FROM `{categories_table_ref}`
+            WHERE category_id = @category_id AND is_active = true
+            """
+            
+            job_config = bigquery.QueryJobConfig(
+                query_parameters=[
+                    bigquery.ScalarQueryParameter("category_id", "STRING", work['category'])
+                ]
+            )
+            
+            category_result = db.client.query(category_query, job_config=job_config).to_dataframe()
+            
+            if not category_result.empty:
+                category_name = category_result['category_name'].iloc[0]
+                category_icon = category_result['category_icon'].iloc[0]
+            else:
+                category_name = work['category']
+                category_icon = "📊"
+                
+        except:
+            category_name = work['category']
+            category_icon = "📊"
+        
+        # Estado con color
+        status_display = {
+            "active": "🟢 Activo",
+            "paused": "⏸️ Pausado",
+            "archived": "📁 Archivado",
+            "maintenance": "🔧 Mantenimiento"
+        }.get(work['status'], "❓ Desconocido")
+        
+        table_data.append({
+            "Trabajo": work['work_name'],
+            "Categoría": f"{category_icon} {category_name}",
+            "Estado": status_display,
+            "Versión": work['version'],
+            "Creado": format_date(work['created_date']),
+            "Acción": f"work_{work['work_id']}"
+        })
+    
+    # Mostrar tabla con st.dataframe personalizada
+    if table_data:
+        # Convertir a DataFrame para st.dataframe
+        import pandas as pd
+        df_table = pd.DataFrame(table_data)
+        
+        # Configurar la tabla
+        st.dataframe(
+            df_table,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Trabajo": st.column_config.TextColumn(
+                    "Trabajo",
+                    width="large",
+                    help="Nombre del trabajo de ciencia de datos"
+                ),
+                "Categoría": st.column_config.TextColumn(
+                    "Categoría",
+                    width="medium",
+                    help="Categoría científica del trabajo"
+                ),
+                "Estado": st.column_config.TextColumn(
+                    "Estado",
+                    width="small",
+                    help="Estado actual del trabajo"
+                ),
+                "Versión": st.column_config.TextColumn(
+                    "Versión",
+                    width="small",
+                    help="Versión del trabajo"
+                ),
+                "Creado": st.column_config.TextColumn(
+                    "Creado",
+                    width="medium",
+                    help="Fecha de creación"
+                ),
+                "Acción": st.column_config.TextColumn(
+                    "Acción",
+                    width="small",
+                    help="Acciones disponibles"
+                )
+            }
+        )
+        
+        # Botones de acción (debajo de la tabla)
+        st.markdown("### 🚀 Acciones")
+        cols = st.columns(min(len(table_data), 4))  # Máximo 4 columnas
+        
+        for i, work_data in enumerate(table_data):
+            with cols[i % 4]:
+                work_id = work_data["Acción"].replace("work_", "")
+                work_name = work_data["Trabajo"]
+                
+                if st.button(f"Ver {work_name[:20]}...", key=f"table_view_{work_id}"):
+                    # Obtener work_url de la base de datos
+                    try:
+                        db = WorksDatabase()
+                        work_info = db.get_work_by_id(work_id)
+                        if work_info and work_info.get('work_url'):
+                            st.query_params.work_url = work_info['work_url']
+                            st.rerun()
+                        else:
+                            st.error("❌ No se especificó URL para este trabajo")
+                    except Exception as e:
+                        st.error(f"❌ Error al cargar trabajo: {str(e)}")
 
 def show_work_card_horizontal(work):
     """Mostrar tarjeta de trabajo en formato horizontal estilo Kaggle"""
