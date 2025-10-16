@@ -11,18 +11,25 @@ class WorksDatabase:
     def __init__(self):
         """Inicializar conexión a BigQuery
         
-        Usa el proyecto activo de gcloud configurado por build_deploy.sh
-        No requiere configuración manual de proyecto
+        Detecta el proyecto desde la variable de entorno o usa el cliente por defecto
         """
         # Dataset y tabla son iguales en todos los ambientes
         self.dataset_id = "settings"
         self.table_id = "works_index"
         
-        # Inicializar cliente BigQuery (usa proyecto activo de gcloud)
-        self.client = bigquery.Client()
+        # Detectar el proyecto desde variables de entorno o configuración
+        # En Cloud Run, la service account tiene acceso al proyecto configurado
+        project_id = os.getenv('GCP_PROJECT') or os.getenv('GOOGLE_CLOUD_PROJECT')
         
-        # Obtener project_id del cliente (para referencias)
-        self.project_id = self.client.project
+        if project_id:
+            # Si hay variable de entorno, usarla explícitamente
+            self.client = bigquery.Client(project=project_id)
+            self.project_id = project_id
+        else:
+            # Fallback: usar cliente sin proyecto específico
+            self.client = bigquery.Client()
+            self.project_id = self.client.project
+        
         self.table_ref = f"{self.project_id}.{self.dataset_id}.{self.table_id}"
     
     def get_all_works(self) -> pd.DataFrame:
@@ -36,29 +43,38 @@ class WorksDatabase:
         return self.client.query(query).to_dataframe()
     
     def get_works_by_category(self, category_name: str) -> pd.DataFrame:
-        """Obtener trabajos por categoría"""
-        # Primero obtener el category_id desde works_categories
-        categories_table_ref = f"{self.project_id}.{self.dataset_id}.works_categories"
-        category_query = f"""
-        SELECT category_id
-        FROM `{categories_table_ref}`
-        WHERE category_name = @category_name AND is_active = true
+        """Obtener trabajos por categoría
+        
+        Intenta obtener category_id desde works_categories.
+        Si no tiene permisos (local), asume que category_name es el category_id.
         """
+        try:
+            # Intentar obtener el category_id desde works_categories
+            categories_table_ref = f"{self.project_id}.{self.dataset_id}.works_categories"
+            category_query = f"""
+            SELECT category_id
+            FROM `{categories_table_ref}`
+            WHERE category_name = @category_name AND is_active = true
+            """
+            
+            job_config = bigquery.QueryJobConfig(
+                query_parameters=[
+                    bigquery.ScalarQueryParameter("category_name", "STRING", category_name)
+                ]
+            )
+            
+            category_result = self.client.query(category_query, job_config=job_config).to_dataframe()
+            
+            if category_result.empty:
+                return pd.DataFrame()  # No hay categoría con ese nombre
+            
+            category_id = category_result['category_id'].iloc[0]
+        except Exception as e:
+            # Fallback: asumir que category_name es el category_id (para ejecución local)
+            print(f"⚠️  No se pudo acceder a works_categories, usando category como ID: {e}")
+            category_id = category_name
         
-        job_config = bigquery.QueryJobConfig(
-            query_parameters=[
-                bigquery.ScalarQueryParameter("category_name", "STRING", category_name)
-            ]
-        )
-        
-        category_result = self.client.query(category_query, job_config=job_config).to_dataframe()
-        
-        if category_result.empty:
-            return pd.DataFrame()  # No hay categoría con ese nombre
-        
-        category_id = category_result['category_id'].iloc[0]
-        
-        # Ahora obtener trabajos por category_id
+        # Obtener trabajos por category_id
         works_query = f"""
         SELECT *
         FROM `{self.table_ref}`
@@ -91,16 +107,31 @@ class WorksDatabase:
         return result.to_dict('records')[0] if not result.empty else None
     
     def get_categories(self) -> List[str]:
-        """Obtener lista de categorías únicas desde works_categories"""
-        categories_table_ref = f"{self.project_id}.{self.dataset_id}.works_categories"
-        query = f"""
-        SELECT category_name
-        FROM `{categories_table_ref}`
-        WHERE is_active = true
-        ORDER BY display_order, category_name
+        """Obtener lista de categorías únicas desde works_categories
+        
+        Si no tiene permisos (ejecución local), usa categorías de works_index
         """
-        result = self.client.query(query).to_dataframe()
-        return result['category_name'].tolist()
+        try:
+            categories_table_ref = f"{self.project_id}.{self.dataset_id}.works_categories"
+            query = f"""
+            SELECT category_name
+            FROM `{categories_table_ref}`
+            WHERE is_active = true
+            ORDER BY display_order, category_name
+            """
+            result = self.client.query(query).to_dataframe()
+            return result['category_name'].tolist()
+        except Exception as e:
+            # Fallback: usar categorías únicas de works_index (para ejecución local)
+            print(f"⚠️  No se pudo acceder a works_categories, usando fallback: {e}")
+            query = f"""
+            SELECT DISTINCT category
+            FROM `{self.table_ref}`
+            WHERE status = 'active' AND category IS NOT NULL
+            ORDER BY category
+            """
+            result = self.client.query(query).to_dataframe()
+            return result['category'].tolist()
     
     def create_work(self, work_data: Dict) -> bool:
         """Crear nuevo trabajo"""

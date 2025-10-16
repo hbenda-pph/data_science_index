@@ -209,7 +209,8 @@ if gcloud run services describe ${SERVICE_NAME} --region=${REGION} --project=${P
         --min-instances ${MIN_INSTANCES} \
         --concurrency ${CONCURRENCY} \
         --port ${PORT} \
-        --service-account ${SERVICE_ACCOUNT}
+        --service-account ${SERVICE_ACCOUNT} \
+        --set-env-vars GCP_PROJECT=${PROJECT_ID}
 else
     echo "🆕 Servicio no existe, creando..."
     gcloud run deploy ${SERVICE_NAME} \
@@ -225,7 +226,8 @@ else
         --timeout ${TIMEOUT} \
         --max-instances ${MAX_INSTANCES} \
         --min-instances ${MIN_INSTANCES} \
-        --concurrency ${CONCURRENCY}
+        --concurrency ${CONCURRENCY} \
+        --set-env-vars GCP_PROJECT=${PROJECT_ID}
 fi
 
 if [ $? -eq 0 ]; then

@@ -232,9 +232,11 @@ def show_works_table(works_df):
                 category_name = work['category']
                 category_icon = "📊"
                 
-        except:
-            category_name = work['category']
-            category_icon = "📊"
+        except Exception as e:
+            # Fallback: usar config.py (para ejecución local sin permisos)
+            category_id = work['category']
+            category_name = CATEGORIES.get(category_id, category_id)
+            category_icon = get_category_icon(category_id)
         
         # Estado con color
         status_display = {
@@ -350,9 +352,11 @@ def show_work_card_horizontal(work):
             category_icon = "📊"
             category_description = ""
             
-    except:
-        category_name = work['category']
-        category_icon = "📊"
+    except Exception as e:
+        # Fallback: usar config.py (para ejecución local sin permisos)
+        category_id = work['category']
+        category_name = CATEGORIES.get(category_id, category_id)
+        category_icon = get_category_icon(category_id)
         category_description = ""
     
     # Contenedor principal con borde y padding
