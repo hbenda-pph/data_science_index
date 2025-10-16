@@ -9,14 +9,21 @@ from typing import List, Dict, Optional
 
 class WorksDatabase:
     def __init__(self):
-        """Inicializar conexión a BigQuery"""
-        self.project_id = "platform-partners-des"
+        """Inicializar conexión a BigQuery
+        
+        Usa el proyecto activo de gcloud configurado por build_deploy.sh
+        No requiere configuración manual de proyecto
+        """
+        # Dataset y tabla son iguales en todos los ambientes
         self.dataset_id = "settings"
         self.table_id = "works_index"
-        self.table_ref = f"{self.project_id}.{self.dataset_id}.{self.table_id}"
         
-        # Inicializar cliente BigQuery
-        self.client = bigquery.Client(project=self.project_id)
+        # Inicializar cliente BigQuery (usa proyecto activo de gcloud)
+        self.client = bigquery.Client()
+        
+        # Obtener project_id del cliente (para referencias)
+        self.project_id = self.client.project
+        self.table_ref = f"{self.project_id}.{self.dataset_id}.{self.table_id}"
     
     def get_all_works(self) -> pd.DataFrame:
         """Obtener todos los trabajos activos"""
