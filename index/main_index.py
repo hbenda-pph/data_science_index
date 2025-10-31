@@ -397,19 +397,19 @@ def show_external_work(work_url: str):
             st.query_params.clear()
             st.rerun()
     
-    # Redirección automática después de 2 segundos + botón manual
+    # Redirección automática en la misma ventana después de 2 segundos + botón manual
     st.markdown(f"""
     <script>
         setTimeout(function() {{
-            window.open("{work_url}", "_blank");
+            window.location.href = "{work_url}";
         }}, 2000);
     </script>
     <div style="text-align: center; padding: 40px 20px;">
         <h2 style="margin-bottom: 20px;">🚀 Redirigiendo al trabajo...</h2>
         <p style="font-size: 16px; color: #666; margin-bottom: 30px;">
-            La aplicación se abrirá en una nueva pestaña en 2 segundos
+            Serás redirigido automáticamente en 2 segundos
         </p>
-        <a href="{work_url}" target="_blank" style="
+        <a href="{work_url}" style="
             display: inline-block;
             padding: 18px 40px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -422,7 +422,7 @@ def show_external_work(work_url: str):
             transition: transform 0.2s, box-shadow 0.2s;
         " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" 
            onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
-            🚀 Abrir Trabajo Ahora
+            🚀 Ir al Trabajo Ahora
         </a>
     </div>
     """, unsafe_allow_html=True)
