@@ -13,6 +13,10 @@ from database import WorksDatabase
 from config import APP_CONFIG, CATEGORIES
 from utils import format_date, get_status_badge, get_category_icon
 
+# Importar estilos compartidos externos (desde módulo compartido)
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'analysis_predictive_shared'))
+from streamlit_config import apply_standard_styles
+
 # Configuración de la página
 st.set_page_config(
     page_title=APP_CONFIG["title"],
@@ -20,6 +24,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Aplicar estilos centralizados INMEDIATAMENTE después de set_page_config
+apply_standard_styles()
 
 def main():
     """Función principal del índice"""
@@ -34,107 +41,6 @@ def main():
         work_id = query_params["work"]
         show_work(work_id)
         return
-    
-    # CSS personalizado para diseño científico formal
-    st.markdown("""
-    <style>
-    /* Estilos científicos formales */
-    .main .block-container {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-        max-width: 1200px;
-    }
-    
-    /* Header más formal */
-    .scientific-header {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        color: white;
-        padding: 30px 20px;
-        border-radius: 10px;
-        margin-bottom: 30px;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    .scientific-header h1 {
-        margin: 0;
-        font-size: 2.2rem;
-        font-weight: 300;
-        letter-spacing: 1px;
-    }
-    
-    .scientific-header p {
-        margin: 10px 0 0 0;
-        font-size: 1rem;
-        opacity: 0.9;
-        font-weight: 300;
-    }
-    
-    /* Tabla científica */
-    .scientific-table {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        border-collapse: collapse;
-        width: 100%;
-        margin: 20px 0;
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .scientific-table th {
-        background-color: #2c3e50;
-        color: white;
-        padding: 15px 12px;
-        text-align: left;
-        font-weight: 600;
-        font-size: 0.9rem;
-        letter-spacing: 0.5px;
-    }
-    
-    .scientific-table td {
-        padding: 12px;
-        border-bottom: 1px solid #ecf0f1;
-        font-size: 0.9rem;
-    }
-    
-    .scientific-table tr:hover {
-        background-color: #f8f9fa;
-    }
-    
-    /* Botones formales */
-    .scientific-button {
-        background-color: #3498db;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    
-    .scientific-button:hover {
-        background-color: #2980b9;
-    }
-    
-    /* Cards más formales */
-    .work-card {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 20px;
-        margin: 15px 0;
-        background: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        transition: box-shadow 0.3s;
-    }
-    
-    .work-card:hover {
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    </style>
-    """, unsafe_allow_html=True)
     
     # Header mejorado
     st.markdown("""
@@ -359,10 +265,10 @@ def show_work_card_horizontal(work):
         category_icon = get_category_icon(category_id)
         category_description = ""
     
-    # Contenedor principal con borde y padding
+    # Contenedor principal con borde y padding usando clase CSS centralizada
     with st.container():
         st.markdown("""
-        <div style="border: 1px solid #e1e5e9; border-radius: 8px; padding: 20px; margin: 10px 0; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div class="work-card">
         """, unsafe_allow_html=True)
         
         # Header del trabajo
@@ -430,10 +336,10 @@ def show_external_work(work_url: str):
     # Header con botón de regreso
     col1, col2 = st.columns([3, 1])
     with col1:
-        st.markdown(f"""
-        <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin-bottom: 30px;">
-            <h1 style="color: white; margin: 0; font-size: 2.2rem;">📊 Trabajo Externo</h1>
-            <p style="color: #f0f0f0; margin: 10px 0 0 0; font-size: 1.1rem;">Cargando trabajo desde URL externa...</p>
+        st.markdown("""
+        <div class="external-work-header">
+            <h1>📊 Trabajo Externo</h1>
+            <p>Cargando trabajo desde URL externa...</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -451,8 +357,8 @@ def show_external_work(work_url: str):
         
         # Botón alternativo para abrir en nueva ventana
         st.markdown(f"""
-        <div style="text-align: center; padding: 20px;">
-            <a href="{work_url}" target="_blank" style="font-size: 18px; color: #1f77b4;">
+        <div class="external-link">
+            <a href="{work_url}" target="_blank">
                 🚀 Abrir trabajo en nueva ventana
             </a>
         </div>
@@ -471,9 +377,9 @@ def show_work(work_id: str):
         
         # Header del trabajo mejorado
         st.markdown(f"""
-        <div style="text-align: center; padding: 20px 0; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin-bottom: 30px;">
-            <h1 style="color: white; margin: 0; font-size: 2.2rem;">📊 {work_data['work_name']}</h1>
-            <p style="color: #f0f0f0; margin: 10px 0 0 0; font-size: 1.1rem;">Versión {work_data['version']} • {get_status_badge(work_data['status'])} {work_data['status'].title()}</p>
+        <div class="external-work-header">
+            <h1>📊 {work_data['work_name']}</h1>
+            <p>Versión {work_data['version']} • {get_status_badge(work_data['status'])} {work_data['status'].title()}</p>
         </div>
         """, unsafe_allow_html=True)
         

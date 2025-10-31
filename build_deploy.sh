@@ -179,10 +179,31 @@ else
     echo "✅ Directorio assets encontrado"
 fi
 
+# Copiar módulo compartido de estilos (desde directorio padre)
+echo ""
+echo "📦 Copiando módulo compartido de estilos..."
+if [ -d "../analysis_predictive_shared" ]; then
+    if [ -d "./analysis_predictive_shared" ]; then
+        rm -rf ./analysis_predictive_shared
+    fi
+    cp -r ../analysis_predictive_shared ./analysis_predictive_shared
+    echo "✅ Módulo compartido copiado"
+else
+    echo "⚠️  Advertencia: No se encontró ../analysis_predictive_shared"
+    echo "⚠️  El build puede fallar si el módulo no está disponible"
+fi
+
 echo ""
 echo "🔨 PASO 2: BUILD (Creando imagen Docker)"
 echo "=========================================="
 gcloud builds submit --tag ${IMAGE_TAG}
+
+# Limpiar módulo shared copiado
+if [ -d "./analysis_predictive_shared" ]; then
+    echo "🧹 Limpiando módulo compartido temporal..."
+    rm -rf ./analysis_predictive_shared
+    echo "✅ Limpieza completada"
+fi
 
 if [ $? -eq 0 ]; then
     echo "✅ Build exitoso!"

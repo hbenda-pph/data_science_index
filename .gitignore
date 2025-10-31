@@ -33,3 +33,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Módulo compartido copiado temporalmente (para build)
+analysis_predictive_shared/
