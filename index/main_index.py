@@ -344,7 +344,15 @@ def show_work_card_horizontal(work):
         st.markdown("</div>", unsafe_allow_html=True)
 
 def show_external_work(work_url: str):
-    """Mostrar trabajo externo embebido"""
+    """Mostrar trabajo externo - Redirigir a URL externa o mostrar iframe"""
+    
+    # Validar URL
+    if not work_url or not work_url.startswith(('http://', 'https://')):
+        st.error(f"❌ URL inválida: {work_url}")
+        if st.button("🔙 Volver al Índice"):
+            st.query_params.clear()
+            st.rerun()
+        return
     
     # Header con botón de regreso
     col1, col2 = st.columns([3, 1])
@@ -352,7 +360,7 @@ def show_external_work(work_url: str):
         st.markdown("""
         <div class="external-work-header">
             <h1>📊 Trabajo Externo</h1>
-            <p>Cargando trabajo desde URL externa...</p>
+            <p>Redirigiendo al trabajo de ciencia de datos...</p>
         </div>
         """, unsafe_allow_html=True)
     
@@ -361,21 +369,39 @@ def show_external_work(work_url: str):
             st.query_params.clear()
             st.rerun()
     
-    # Mostrar trabajo en iframe
+    # Opción 1: Intentar mostrar en iframe (si el sitio lo permite)
+    st.markdown("### 📊 Vista Previa")
     try:
-        st.components.v1.iframe(work_url, height=800)
+        st.components.v1.iframe(work_url, height=800, scrolling=True)
+        st.info(f"💡 Si la vista previa no funciona, usa el botón de abajo para abrir en una nueva pestaña")
     except Exception as e:
-        st.error(f"❌ Error al cargar el trabajo: {str(e)}")
-        st.info(f"URL: {work_url}")
-        
-        # Botón alternativo para abrir en nueva ventana
-        st.markdown(f"""
-        <div class="external-link">
-            <a href="{work_url}" target="_blank">
-                🚀 Abrir trabajo en nueva ventana
-            </a>
-        </div>
-        """, unsafe_allow_html=True)
+        st.warning(f"⚠️ No se pudo cargar la vista previa: {str(e)}")
+        st.info("Esto es normal si el sitio externo bloquea iframes por seguridad.")
+    
+    # Opción 2: Botón prominente para abrir en nueva ventana (siempre visible)
+    st.markdown("---")
+    st.markdown(f"""
+    <div style="text-align: center; padding: 30px;">
+        <a href="{work_url}" target="_blank" style="
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        ">
+            🚀 Abrir Trabajo en Nueva Pestaña
+        </a>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Información adicional
+    with st.expander("ℹ️ Información de la URL"):
+        st.code(work_url, language=None)
 
 def show_work(work_id: str):
     """Mostrar y ejecutar un trabajo específico"""
