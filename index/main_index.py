@@ -352,7 +352,7 @@ def show_work_card_horizontal(work):
         st.markdown("</div>", unsafe_allow_html=True)
 
 def show_external_work(work_url: str):
-    """Mostrar trabajo externo - Redirigir a URL externa o mostrar iframe"""
+    """Mostrar página de redirección a trabajo externo - Sin iframe"""
     
     # Validar y limpiar URL
     if not work_url:
@@ -368,68 +368,68 @@ def show_external_work(work_url: str):
     # Validar formato de URL
     if not work_url.startswith(('http://', 'https://')):
         st.error(f"❌ URL inválida (debe comenzar con http:// o https://): {work_url}")
-        st.info("URL recibida: " + repr(work_url))
         if st.button("🔙 Volver al Índice"):
             st.query_params.clear()
             st.rerun()
         return
+    
+    # Decodificar URL si está codificada
+    import urllib.parse
+    try:
+        decoded_url = urllib.parse.unquote(work_url)
+        if decoded_url != work_url:
+            work_url = decoded_url
+    except:
+        pass
     
     # Header con botón de regreso
     col1, col2 = st.columns([3, 1])
     with col1:
         st.markdown("""
         <div class="external-work-header">
-            <h1>📊 Trabajo Externo</h1>
-            <p>Redirigiendo al trabajo de ciencia de datos...</p>
+            <h1>📊 Trabajo de Ciencia de Datos</h1>
+            <p>Haz clic en el botón para acceder al análisis completo</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
-        if st.button("🔙 Volver al Índice", type="secondary"):
+        if st.button("🔙 Volver al Índice", type="secondary", use_container_width=True):
             st.query_params.clear()
             st.rerun()
     
-    # Opción 1: Intentar mostrar en iframe (si el sitio lo permite)
-    st.markdown("### 📊 Vista Previa")
-    try:
-        # Decodificar URL si está codificada
-        import urllib.parse
-        try:
-            decoded_url = urllib.parse.unquote(work_url)
-            if decoded_url != work_url:
-                work_url = decoded_url
-        except:
-            pass
-        
-        st.components.v1.iframe(work_url, height=800, scrolling=True)
-    except Exception as e:
-        st.warning(f"⚠️ No se pudo cargar la vista previa")
-        st.error(f"Error: {str(e)}")
-        st.info("Esto es normal si el sitio externo bloquea iframes por seguridad (X-Frame-Options).")
-    
-    # Opción 2: Botón prominente para abrir en nueva ventana (siempre visible)
-    st.markdown("---")
+    # Redirección automática después de 2 segundos + botón manual
     st.markdown(f"""
-    <div style="text-align: center; padding: 30px;">
+    <script>
+        setTimeout(function() {{
+            window.open("{work_url}", "_blank");
+        }}, 2000);
+    </script>
+    <div style="text-align: center; padding: 40px 20px;">
+        <h2 style="margin-bottom: 20px;">🚀 Redirigiendo al trabajo...</h2>
+        <p style="font-size: 16px; color: #666; margin-bottom: 30px;">
+            La aplicación se abrirá en una nueva pestaña en 2 segundos
+        </p>
         <a href="{work_url}" target="_blank" style="
             display: inline-block;
-            padding: 15px 30px;
+            padding: 18px 40px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            font-size: 18px;
+            border-radius: 10px;
+            font-size: 20px;
             font-weight: 600;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        ">
-            🚀 Abrir Trabajo en Nueva Pestaña
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.6)'" 
+           onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'">
+            🚀 Abrir Trabajo Ahora
         </a>
     </div>
     """, unsafe_allow_html=True)
     
-    # Información adicional
-    with st.expander("ℹ️ Información de la URL"):
+    # Información adicional (colapsable)
+    with st.expander("ℹ️ Información del Trabajo"):
+        st.info(f"**URL del trabajo:** {work_url}")
         st.code(work_url, language=None)
 
 def show_work(work_id: str):
