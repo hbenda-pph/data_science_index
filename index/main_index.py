@@ -46,9 +46,17 @@ def main():
     
     # Verificar si se quiere ver un trabajo específico
     query_params = st.query_params
+    
+    # Manejar work_url (puede ser string o lista)
     if "work_url" in query_params:
-        show_external_work(query_params["work_url"])
-        return
+        work_url = query_params["work_url"]
+        # Si es lista, tomar el primer elemento
+        if isinstance(work_url, list):
+            work_url = work_url[0] if work_url else None
+        # Si es string vacío, ignorar
+        if work_url:
+            show_external_work(work_url)
+            return
     
     if "work" in query_params:
         work_id = query_params["work"]
@@ -346,9 +354,21 @@ def show_work_card_horizontal(work):
 def show_external_work(work_url: str):
     """Mostrar trabajo externo - Redirigir a URL externa o mostrar iframe"""
     
-    # Validar URL
-    if not work_url or not work_url.startswith(('http://', 'https://')):
-        st.error(f"❌ URL inválida: {work_url}")
+    # Validar y limpiar URL
+    if not work_url:
+        st.error("❌ URL vacía o no proporcionada")
+        if st.button("🔙 Volver al Índice"):
+            st.query_params.clear()
+            st.rerun()
+        return
+    
+    # Asegurar que sea string
+    work_url = str(work_url).strip()
+    
+    # Validar formato de URL
+    if not work_url.startswith(('http://', 'https://')):
+        st.error(f"❌ URL inválida (debe comenzar con http:// o https://): {work_url}")
+        st.info("URL recibida: " + repr(work_url))
         if st.button("🔙 Volver al Índice"):
             st.query_params.clear()
             st.rerun()
@@ -372,11 +392,20 @@ def show_external_work(work_url: str):
     # Opción 1: Intentar mostrar en iframe (si el sitio lo permite)
     st.markdown("### 📊 Vista Previa")
     try:
+        # Decodificar URL si está codificada
+        import urllib.parse
+        try:
+            decoded_url = urllib.parse.unquote(work_url)
+            if decoded_url != work_url:
+                work_url = decoded_url
+        except:
+            pass
+        
         st.components.v1.iframe(work_url, height=800, scrolling=True)
-        st.info(f"💡 Si la vista previa no funciona, usa el botón de abajo para abrir en una nueva pestaña")
     except Exception as e:
-        st.warning(f"⚠️ No se pudo cargar la vista previa: {str(e)}")
-        st.info("Esto es normal si el sitio externo bloquea iframes por seguridad.")
+        st.warning(f"⚠️ No se pudo cargar la vista previa")
+        st.error(f"Error: {str(e)}")
+        st.info("Esto es normal si el sitio externo bloquea iframes por seguridad (X-Frame-Options).")
     
     # Opción 2: Botón prominente para abrir en nueva ventana (siempre visible)
     st.markdown("---")
