@@ -14,14 +14,21 @@ from config import APP_CONFIG, CATEGORIES
 from utils import format_date, get_status_badge, get_category_icon
 
 # Importar estilos compartidos externos (desde módulo compartido)
+# Exactamente como en calls_analysis_dashboard que funciona
 try:
     # Intentar desde directorio raíz del proyecto (producción/Docker)
+    # Desde /app/index/main_index.py -> /app/analysis_predictive_shared
     sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'analysis_predictive_shared'))
     from streamlit_config import apply_standard_styles
 except ImportError:
-    # Fallback: intentar desde directorio padre
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'analysis_predictive_shared'))
-    from streamlit_config import apply_standard_styles
+    try:
+        # Fallback: desde directorio actual si está en el mismo nivel
+        sys.path.append(os.path.join(os.path.dirname(__file__), 'analysis_predictive_shared'))
+        from streamlit_config import apply_standard_styles
+    except ImportError:
+        # Si no se encuentra, definir función vacía (no debería pasar en Cloud Run)
+        def apply_standard_styles():
+            pass
 
 # Configuración de la página
 st.set_page_config(

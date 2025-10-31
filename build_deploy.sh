@@ -181,21 +181,34 @@ fi
 
 # Copiar módulo compartido de estilos (desde directorio padre)
 echo ""
-echo "📦 Copiando módulo compartido de estilos..."
+echo "📦 PASO 1.5: COPIAR MÓDULO COMPARTIDO"
+echo "======================================"
 if [ -d "../analysis_predictive_shared" ]; then
     if [ -d "./analysis_predictive_shared" ]; then
+        echo "🧹 Limpiando módulo compartido anterior..."
         rm -rf ./analysis_predictive_shared
     fi
+    echo "📋 Copiando módulo desde ../analysis_predictive_shared..."
     cp -r ../analysis_predictive_shared ./analysis_predictive_shared
     echo "✅ Módulo compartido copiado"
+    
+    # Verificar que se copió correctamente
+    if [ -f "./analysis_predictive_shared/streamlit_config.py" ]; then
+        echo "✅ streamlit_config.py encontrado en módulo copiado"
+    else
+        echo "❌ ERROR: streamlit_config.py NO encontrado en módulo copiado"
+        exit 1
+    fi
 else
-    echo "⚠️  Advertencia: No se encontró ../analysis_predictive_shared"
-    echo "⚠️  El build puede fallar si el módulo no está disponible"
+    echo "❌ ERROR: No se encontró ../analysis_predictive_shared"
+    echo "❌ El build FALLARÁ sin este módulo"
+    exit 1
 fi
 
 echo ""
 echo "🔨 PASO 2: BUILD (Creando imagen Docker)"
 echo "=========================================="
+echo "⚠️  NOTA: El módulo analysis_predictive_shared debe estar incluido en la imagen"
 gcloud builds submit --tag ${IMAGE_TAG}
 
 # Limpiar módulo shared copiado
