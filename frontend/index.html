@@ -581,7 +581,9 @@
                          data-work-id="${escapeHtml(work.work_id)}"
                          data-work-url="${escapeHtml(workUrl)}"
                          data-work-title="${escapeHtml(title)}"
-                         data-work-category="${escapeHtml(work.category_name || work.category || '')}">
+                         data-work-category="${escapeHtml(work.category_name || work.category || '')}"
+                         role="button"
+                         tabindex="0">
                         <div class="work-item-icon">${work.category_icon || '📊'}</div>
                         <div class="work-item-content">
                             <div class="work-item-title">${escapeHtml(title)}</div>
@@ -595,17 +597,25 @@
                 `;
             }).join('');
             
-            // Agregar event listeners después de renderizar
+            // Agregar event listeners después de renderizar - usar capture phase
             container.querySelectorAll('.work-item').forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
                     const workId = this.getAttribute('data-work-id');
                     const workUrl = this.getAttribute('data-work-url');
                     const workTitle = this.getAttribute('data-work-title');
                     const workCategory = this.getAttribute('data-work-category');
+                    
                     selectWork(workId, workUrl, workTitle, workCategory, e);
-                });
+                    return false;
+                }, true);
+                
+                // También prevenir cualquier navegación
+                item.style.cursor = 'pointer';
+                item.setAttribute('onclick', 'return false;');
             });
         }
 
@@ -628,18 +638,25 @@
         // ============================================================================
         
         function selectWork(workId, workUrl, workTitle, categoryName, event) {
-            console.log('selectWork called:', { workId, workUrl, workTitle, categoryName });
-            
             if (!workUrl || workUrl === '' || workUrl === '#') {
                 alert('Este trabajo no tiene URL configurada');
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
                 return false;
             }
             
-            // Prevenir navegación si hay evento
+            // Prevenir CUALQUIER navegación
             if (event) {
                 event.preventDefault();
                 event.stopPropagation();
+                event.stopImmediatePropagation();
             }
+            
+            // Prevenir navegación del navegador
+            window.event && window.event.preventDefault();
+            window.event && window.event.stopPropagation();
             
             currentWorkId = workId;
             
