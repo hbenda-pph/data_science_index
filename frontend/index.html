@@ -241,7 +241,12 @@
             const port = window.location.port ? `:${window.location.port}` : '';
             
             // Si estamos en Cloud Run, construir la URL de la API
-            // Patrón: data-science-index-frontend-* -> data-science-index-api-*
+            // Patrón: dsi-frontend-* -> dsi-api-*
+            if (hostname.includes('dsi-frontend')) {
+                const apiHostname = hostname.replace('dsi-frontend', 'dsi-api');
+                return `${protocol}//${apiHostname}${port}`;
+            }
+            // Fallback para nombres antiguos
             if (hostname.includes('data-science-index-frontend')) {
                 const apiHostname = hostname.replace('data-science-index-frontend', 'data-science-index-api');
                 return `${protocol}//${apiHostname}${port}`;
@@ -357,7 +362,7 @@
                         <span>${work.category_name}</span>
                         <span>${work.created_date}</span>
                     </div>
-                    <a href="${work.url}" target="_blank" class="work-card-url">
+                    <a href="${work.url}" class="work-card-url" onclick="event.preventDefault(); window.location.href='${work.url}';">
                         🚀 Ver Trabajo
                     </a>
                 </div>
