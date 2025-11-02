@@ -80,9 +80,32 @@ echo "   Región: ${REGION}"
 echo "   Imagen: ${IMAGE_TAG}"
 echo ""
 
-# Verificar que estamos en el directorio correcto
+# Detectar directorio del script y directorio raíz del proyecto
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CURRENT_DIR="$(pwd)"
+
+# Determinar directorio raíz del proyecto
+# Caso 1: Script ejecutado desde api/build_deploy.sh (estamos en api/)
+if [ -f "${SCRIPT_DIR}/main.py" ]; then
+    PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# Caso 2: Script ejecutado desde raíz como ./api/build_deploy.sh
+elif [ -f "${SCRIPT_DIR}/../api/main.py" ]; then
+    PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# Caso 3: Estamos ya en el raíz
+elif [ -f "${CURRENT_DIR}/api/main.py" ]; then
+    PROJECT_ROOT="$CURRENT_DIR"
+else
+    echo "❌ Error: No se encontró directorio raíz del proyecto"
+    echo "   Ejecuta desde: data_science_index/ o api/"
+    exit 1
+fi
+
+# Navegar al directorio raíz para el build (Docker necesita contexto desde raíz)
+cd "$PROJECT_ROOT"
+
+# Verificar archivos necesarios
 if [ ! -f "api/main.py" ]; then
-    echo "❌ Error: api/main.py no encontrado. Ejecuta desde el directorio data_science_index/"
+    echo "❌ Error: api/main.py no encontrado"
     exit 1
 fi
 

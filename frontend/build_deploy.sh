@@ -80,9 +80,32 @@ echo "   API Service: ${API_SERVICE_NAME}"
 echo "   Región: ${REGION}"
 echo ""
 
-# Verificar que estamos en el directorio correcto
+# Detectar directorio del script y directorio raíz del proyecto
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CURRENT_DIR="$(pwd)"
+
+# Determinar directorio raíz del proyecto
+# Caso 1: Script ejecutado desde frontend/build_deploy.sh (estamos en frontend/)
+if [ -f "${SCRIPT_DIR}/index.html" ]; then
+    PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# Caso 2: Script ejecutado desde raíz como ./frontend/build_deploy.sh
+elif [ -f "${SCRIPT_DIR}/../frontend/index.html" ]; then
+    PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# Caso 3: Estamos ya en el raíz
+elif [ -f "${CURRENT_DIR}/frontend/index.html" ]; then
+    PROJECT_ROOT="$CURRENT_DIR"
+else
+    echo "❌ Error: No se encontró directorio raíz del proyecto"
+    echo "   Ejecuta desde: data_science_index/ o frontend/"
+    exit 1
+fi
+
+# Navegar al directorio raíz para el build (Docker necesita contexto desde raíz)
+cd "$PROJECT_ROOT"
+
+# Verificar archivos necesarios
 if [ ! -f "frontend/index.html" ]; then
-    echo "❌ Error: frontend/index.html no encontrado. Ejecuta desde el directorio data_science_index/"
+    echo "❌ Error: frontend/index.html no encontrado"
     exit 1
 fi
 
