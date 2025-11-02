@@ -98,20 +98,56 @@ def get_all_works():
         if df.empty:
             return {"works": [], "count": 0}
         
+        # Obtener mapeo de categorías desde works_categories (si está disponible)
+        category_map = {}
+        try:
+            from google.cloud import bigquery
+            categories_table_ref = f"{db.project_id}.{db.dataset_id}.works_categories"
+            category_query = f"""
+            SELECT category_id, category_name, category_icon
+            FROM `{categories_table_ref}`
+            WHERE is_active = true
+            """
+            cat_result = db.client.query(category_query).to_dataframe()
+            if not cat_result.empty:
+                for _, cat_row in cat_result.iterrows():
+                    category_map[str(cat_row.get("category_id", ""))] = {
+                        "name": str(cat_row.get("category_name", "")),
+                        "icon": str(cat_row.get("category_icon", "📊"))
+                    }
+        except Exception as e:
+            print(f"⚠️  No se pudieron cargar categorías desde BigQuery: {e}")
+        
         # Convertir DataFrame a lista de diccionarios
         works = []
         for _, row in df.iterrows():
+            category_id = str(row.get("category", ""))
+            
+            # Obtener nombre e icono de categoría
+            if category_id in category_map:
+                category_name = category_map[category_id]["name"]
+                category_icon = category_map[category_id]["icon"]
+            else:
+                # Fallback a config.py
+                category_name = CATEGORIES.get(category_id, category_id)
+                category_icon = get_category_icon(category_id)
+            
             work = {
                 "work_id": str(row.get("work_id", "")),
-                "title": str(row.get("title", "")),
+                "title": str(row.get("work_name", "")),  # Usar work_name de BigQuery
+                "work_name": str(row.get("work_name", "")),  # Mantener ambos para compatibilidad
                 "description": str(row.get("description", "")),
-                "category": str(row.get("category", "")),
-                "category_name": CATEGORIES.get(str(row.get("category", "")), str(row.get("category", ""))),
-                "url": str(row.get("url", "")),
+                "short_description": str(row.get("short_description", "")),
+                "category": category_id,
+                "category_name": category_name,
+                "url": str(row.get("work_url", "")),  # Usar work_url de BigQuery
+                "work_url": str(row.get("work_url", "")),  # Mantener ambos para compatibilidad
+                "version": str(row.get("version", "")),
                 "created_date": format_date(row.get("created_date")) if pd.notna(row.get("created_date", pd.NaT)) else "",
                 "status": str(row.get("status", "active")),
                 "status_badge": get_status_badge(str(row.get("status", "active"))),
-                "category_icon": get_category_icon(str(row.get("category", ""))),
+                "category_icon": category_icon,
+                "notes": str(row.get("notes", "")),
             }
             works.append(work)
         
@@ -129,20 +165,56 @@ def get_works_by_category(category: str):
         if df.empty:
             return {"works": [], "count": 0, "category": category}
         
+        # Obtener mapeo de categorías desde works_categories (si está disponible)
+        category_map = {}
+        try:
+            from google.cloud import bigquery
+            categories_table_ref = f"{db.project_id}.{db.dataset_id}.works_categories"
+            category_query = f"""
+            SELECT category_id, category_name, category_icon
+            FROM `{categories_table_ref}`
+            WHERE is_active = true
+            """
+            cat_result = db.client.query(category_query).to_dataframe()
+            if not cat_result.empty:
+                for _, cat_row in cat_result.iterrows():
+                    category_map[str(cat_row.get("category_id", ""))] = {
+                        "name": str(cat_row.get("category_name", "")),
+                        "icon": str(cat_row.get("category_icon", "📊"))
+                    }
+        except Exception as e:
+            print(f"⚠️  No se pudieron cargar categorías desde BigQuery: {e}")
+        
         # Convertir DataFrame a lista de diccionarios
         works = []
         for _, row in df.iterrows():
+            category_id = str(row.get("category", ""))
+            
+            # Obtener nombre e icono de categoría
+            if category_id in category_map:
+                category_name = category_map[category_id]["name"]
+                category_icon = category_map[category_id]["icon"]
+            else:
+                # Fallback a config.py
+                category_name = CATEGORIES.get(category_id, category_id)
+                category_icon = get_category_icon(category_id)
+            
             work = {
                 "work_id": str(row.get("work_id", "")),
-                "title": str(row.get("title", "")),
+                "title": str(row.get("work_name", "")),  # Usar work_name de BigQuery
+                "work_name": str(row.get("work_name", "")),  # Mantener ambos para compatibilidad
                 "description": str(row.get("description", "")),
-                "category": str(row.get("category", "")),
-                "category_name": CATEGORIES.get(str(row.get("category", "")), str(row.get("category", ""))),
-                "url": str(row.get("url", "")),
+                "short_description": str(row.get("short_description", "")),
+                "category": category_id,
+                "category_name": category_name,
+                "url": str(row.get("work_url", "")),  # Usar work_url de BigQuery
+                "work_url": str(row.get("work_url", "")),  # Mantener ambos para compatibilidad
+                "version": str(row.get("version", "")),
                 "created_date": format_date(row.get("created_date")) if pd.notna(row.get("created_date", pd.NaT)) else "",
                 "status": str(row.get("status", "active")),
                 "status_badge": get_status_badge(str(row.get("status", "active"))),
-                "category_icon": get_category_icon(str(row.get("category", ""))),
+                "category_icon": category_icon,
+                "notes": str(row.get("notes", "")),
             }
             works.append(work)
         
@@ -153,14 +225,45 @@ def get_works_by_category(category: str):
 
 @app.get("/categories")
 def get_categories():
-    """Obtener todas las categorías disponibles"""
+    """Obtener todas las categorías disponibles desde works_categories"""
     try:
+        # Intentar obtener categorías desde BigQuery
+        try:
+            from google.cloud import bigquery
+            
+            categories_table_ref = f"{db.project_id}.{db.dataset_id}.works_categories"
+            query = f"""
+            SELECT category_id, category_name, category_icon, description, display_order
+            FROM `{categories_table_ref}`
+            WHERE is_active = true
+            ORDER BY display_order, category_name
+            """
+            result = db.client.query(query).to_dataframe()
+            
+            if not result.empty:
+                categories_list = []
+                for _, row in result.iterrows():
+                    categories_list.append({
+                        "id": str(row.get("category_id", "")),
+                        "name": str(row.get("category_name", "")),
+                        "icon": str(row.get("category_icon", "📊")),
+                        "description": str(row.get("description", "")),
+                        "display_order": int(row.get("display_order", 0)) if pd.notna(row.get("display_order")) else 0
+                    })
+                return {"categories": categories_list, "count": len(categories_list)}
+        except Exception as bq_error:
+            # Fallback: usar CATEGORIES de config.py
+            print(f"⚠️  No se pudo acceder a works_categories, usando fallback: {bq_error}")
+        
+        # Fallback a config.py
         categories_list = []
         for cat_id, cat_name in CATEGORIES.items():
             categories_list.append({
                 "id": cat_id,
                 "name": cat_name,
-                "icon": get_category_icon(cat_id)
+                "icon": get_category_icon(cat_id),
+                "description": "",
+                "display_order": 0
             })
         
         return {"categories": categories_list, "count": len(categories_list)}

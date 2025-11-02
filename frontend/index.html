@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Science Index</title>
+    <meta name="description" content="Portafolio de Análisis Predictivo y Ciencia de Datos - Data Science Index">
+    <title>Data Science Index | Portafolio de Análisis</title>
     <style>
         * {
             margin: 0;
@@ -11,226 +12,472 @@
             box-sizing: border-box;
         }
 
+        :root {
+            /* ============================================
+               PALETA CIENTÍFICA (Consistente con Streamlit)
+               Basado en streamlit_config.py y STYLE_OPTIONS.md
+               ============================================ */
+            --primary: #0066cc;          /* Azul científico */
+            --primary-dark: #0052a3;
+            --primary-light: #3385d6;
+            --secondary: #6c757d;        /* Gris secundario */
+            --accent: #17a2b8;           /* Info/cian */
+            --bg: #fafafa;               /* Fondo tipo paper científico */
+            --bg-dark: #f8f9fa;          /* Sidebar/cards secundarios */
+            --card-bg: #ffffff;          /* Blanco para cards */
+            --text: #212121;             /* Gris muy oscuro (no negro puro) */
+            --text-light: #6c757d;        /* Texto secundario */
+            --border: #e0e0e0;           /* Bordes sutiles */
+            --success: #28a745;          /* Verde científico */
+            --warning: #ffc107;          /* Amarillo científico */
+            --error: #dc3545;            /* Rojo científico */
+            --info: #17a2b8;             /* Cian/info */
+            --shadow: rgba(0, 0, 0, 0.08);
+            --shadow-lg: rgba(0, 0, 0, 0.12);
+            
+            /* Colores adicionales del estilo compartido */
+            --positive: #d4edda;         /* Fondo positivo */
+            --negative: #f8d7da;         /* Fondo negativo */
+            --neutral: #f8f9fa;          /* Fondo neutro */
+        }
+
         body {
+            /* Tipografía científica - misma que Streamlit */
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
             min-height: 100vh;
-            padding: 20px;
+        }
+        
+        /* Números monoespaciados para datos (estilo científico) */
+        .stat-value,
+        .work-card-date {
+            font-variant-numeric: tabular-nums;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-
+        /* Header - Estilo científico sobrio */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary);  /* Azul científico sólido, sin gradiente */
             color: white;
-            padding: 40px;
+            padding: 2.5rem 2rem;
             text-align: center;
+            box-shadow: 0 2px 4px var(--shadow);
+            border-bottom: 3px solid var(--primary-dark);
         }
 
         .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
         }
 
         .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            opacity: 0.95;
+            font-weight: 300;
         }
 
-        .content {
-            padding: 40px;
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .error {
-            background: #fee;
-            color: #c33;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-
-        .categories {
+        /* Search and Filters Bar */
+        .controls {
+            background: var(--card-bg);
+            border-radius: 6px;  /* Más sutil */
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px var(--shadow);
+            border: 1px solid var(--border);
             display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;  /* Más sutil */
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1.25rem;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
             flex-wrap: wrap;
         }
 
-        .category-btn {
-            padding: 12px 24px;
-            background: #f0f0f0;
-            border: 2px solid #ddd;
-            border-radius: 25px;
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;  /* Más sutil, menos redondeado */
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary);
+            background: var(--bg-dark);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 6px;  /* Más sutil, estilo científico */
+            box-shadow: 0 1px 3px var(--shadow);
+            text-align: center;
+            transition: all 0.2s;
+            border: 1px solid var(--border);  /* Borde sutil como en Streamlit */
+        }
+
+        .stat-card:hover {
+            box-shadow: 0 2px 6px var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+
+        .stat-value {
+            font-size: 2rem;  /* Más compacto */
+            font-weight: 600;  /* Menos bold */
+            color: var(--primary);
+            margin-bottom: 0.4rem;
+            font-variant-numeric: tabular-nums;  /* Números alineados */
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             font-weight: 500;
         }
 
-        .category-btn:hover {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-            transform: translateY(-2px);
-        }
-
-        .category-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
+        /* Works Grid */
         .works-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
 
         .work-card {
-            background: #f9f9f9;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            padding: 25px;
-            transition: all 0.3s;
-            cursor: pointer;
+            background: var(--card-bg);
+            border-radius: 6px;  /* Más sutil, estilo científico */
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px var(--shadow);
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .work-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-            border-color: #667eea;
+            box-shadow: 0 3px 8px var(--shadow-lg);
+            border-color: var(--primary);
         }
 
         .work-card-header {
             display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
 
         .work-card-icon {
-            font-size: 2em;
+            font-size: 2.5rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .work-card-title-group {
+            flex: 1;
+            min-width: 0;
         }
 
         .work-card-title {
-            font-size: 1.3em;
+            font-size: 1.1rem;  /* Más compacto, estilo científico */
             font-weight: 600;
-            color: #333;
-            flex: 1;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+            line-height: 1.4;
+            word-wrap: break-word;
         }
 
         .work-card-status {
-            font-size: 1.2em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;  /* Más sutil */
+            font-size: 0.7rem;
+            font-weight: 500;
+            background: var(--bg-dark);
+            color: var(--primary);
+            border: 1px solid var(--border);
         }
 
         .work-card-description {
-            color: #666;
-            margin-bottom: 15px;
+            color: var(--text-light);
+            margin-bottom: 1rem;
             line-height: 1.6;
+            flex: 1;
+            font-size: 0.95rem;
         }
 
         .work-card-meta {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.9em;
-            color: #999;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .work-card-category {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .work-card-date {
+            font-size: 0.8rem;
         }
 
         .work-card-url {
-            margin-top: 15px;
-            padding: 10px;
-            background: #667eea;
+            padding: 0.625rem 1.25rem;
+            background: var(--primary);  /* Sólido, sin gradiente */
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            display: block;
+            border-radius: 6px;  /* Más sutil */
             text-align: center;
-            font-weight: 500;
-            transition: background 0.3s;
+            font-weight: 500;  /* Menos bold */
+            transition: all 0.2s;
+            display: block;
             cursor: pointer;
+            border: none;
+            width: 100%;
+            font-size: 0.9rem;
         }
 
         .work-card-url:hover {
-            background: #5568d3;
+            background: var(--primary-dark);
+            box-shadow: 0 2px 6px rgba(0, 102, 204, 0.25);
         }
 
-        .stats {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-light);
         }
 
-        .stat-box {
-            flex: 1;
-            min-width: 150px;
-            background: #f0f0f0;
-            padding: 20px;
-            border-radius: 10px;
+        .loading-spinner {
+            display: inline-block;
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error State */
+        .error {
+            background: var(--negative);  /* Color del estilo compartido */
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1.5rem 0;
             text-align: center;
         }
 
-        .stat-value {
-            font-size: 2em;
-            font-weight: 700;
-            color: #667eea;
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-light);
         }
 
-        .stat-label {
-            color: #666;
-            margin-top: 5px;
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .empty-state-subtext {
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header {
+                padding: 2rem 1rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .works-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Fade in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .work-card {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>📊 Data Science Index</h1>
+        <p>Portafolio de Análisis Predictivo y Ciencia de Datos</p>
+    </div>
+
     <div class="container">
-        <div class="header">
-            <h1>📊 Data Science Index</h1>
-            <p>Portafolio de Análisis Predictivo y Ciencia de Datos</p>
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Cargando trabajos...</p>
         </div>
 
-        <div class="content">
-            <div id="loading" class="loading">
-                <p>🔄 Cargando trabajos...</p>
-            </div>
+        <!-- Error State -->
+        <div id="error" class="error" style="display: none;"></div>
 
-            <div id="error" class="error" style="display: none;"></div>
-
-            <div id="content" style="display: none;">
-                <div class="stats">
-                    <div class="stat-box">
-                        <div class="stat-value" id="total-works">0</div>
-                        <div class="stat-label">Trabajos Totales</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="current-category-count">0</div>
-                        <div class="stat-label">En Categoría</div>
-                    </div>
+        <!-- Main Content -->
+        <div id="content" style="display: none;">
+            <!-- Controls -->
+            <div class="controls">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Buscar trabajos por nombre, descripción o categoría..."
+                        autocomplete="off"
+                    >
                 </div>
-
-                <div class="categories" id="categories"></div>
-                <div class="works-grid" id="works-grid"></div>
+                <div class="filter-group" id="categories"></div>
             </div>
+
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-works">0</div>
+                    <div class="stat-label">Trabajos Totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="filtered-works">0</div>
+                    <div class="stat-label">Resultados Mostrados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="active-works">0</div>
+                    <div class="stat-label">Trabajos Activos</div>
+                </div>
+            </div>
+
+            <!-- Works Grid -->
+            <div class="works-grid" id="works-grid"></div>
         </div>
     </div>
 
     <script>
-        // Determinar URL de la API basado en el ambiente
+        // ============================================================================
+        // CONFIGURACIÓN
+        // ============================================================================
+        
         function getApiUrl() {
             // Si está definida globalmente, usarla
             if (window.API_URL) {
@@ -242,12 +489,10 @@
             const port = window.location.port ? `:${window.location.port}` : '';
             
             // Si estamos en Cloud Run, construir la URL de la API
-            // Patrón: dsi-frontend-* -> dsi-api-*
             if (hostname.includes('dsi-frontend')) {
                 const apiHostname = hostname.replace('dsi-frontend', 'dsi-api');
                 return `${protocol}//${apiHostname}${port}`;
             }
-            // Fallback para nombres antiguos
             if (hostname.includes('data-science-index-frontend')) {
                 const apiHostname = hostname.replace('data-science-index-frontend', 'data-science-index-api');
                 return `${protocol}//${apiHostname}${port}`;
@@ -259,120 +504,245 @@
             }
             
             // Fallback: intentar construir desde el dominio actual
-            // Esto asume que la API está en el mismo proyecto
             return `${protocol}//${hostname.replace('frontend', 'api')}${port}`;
         }
 
         const API_URL = getApiUrl();
+        
+        // ============================================================================
+        // ESTADO GLOBAL
+        // ============================================================================
+        
         let allWorks = [];
-        let currentCategory = 'all';
+        let allCategories = [];
+        let currentCategoryFilter = 'all';
+        let currentSearchQuery = '';
 
-        // Cargar categorías
+        // ============================================================================
+        // UTILIDADES
+        // ============================================================================
+        
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('content').style.display = 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').textContent = `❌ ${message}`;
+            document.getElementById('content').style.display = 'none';
+        }
+
+        function showContent() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function highlightText(text, query) {
+            if (!query) return escapeHtml(text);
+            const regex = new RegExp(`(${query})`, 'gi');
+            return escapeHtml(text).replace(regex, '<mark>$1</mark>');
+        }
+
+        // ============================================================================
+        // CARGAR DATOS
+        // ============================================================================
+        
         async function loadCategories() {
             try {
                 const response = await fetch(`${API_URL}/categories`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
                 const data = await response.json();
+                allCategories = data.categories || [];
                 
-                const categoriesDiv = document.getElementById('categories');
-                categoriesDiv.innerHTML = '';
-                
-                // Botón "Todos"
-                const allBtn = document.createElement('button');
-                allBtn.className = 'category-btn active';
-                allBtn.textContent = '📊 Todos';
-                allBtn.onclick = () => filterByCategory('all');
-                categoriesDiv.appendChild(allBtn);
-                
-                // Botones de categorías
-                data.categories.forEach(cat => {
-                    const btn = document.createElement('button');
-                    btn.className = 'category-btn';
-                    btn.textContent = `${cat.icon} ${cat.name}`;
-                    btn.onclick = () => filterByCategory(cat.id);
-                    categoriesDiv.appendChild(btn);
-                });
+                renderCategories();
             } catch (error) {
                 console.error('Error cargando categorías:', error);
+                // Continuar sin categorías
             }
         }
 
-        // Cargar trabajos
         async function loadWorks() {
+            showLoading();
+            
             try {
-                document.getElementById('loading').style.display = 'block';
-                document.getElementById('error').style.display = 'none';
-                document.getElementById('content').style.display = 'none';
-
                 const response = await fetch(`${API_URL}/works`);
-                const data = await response.json();
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 
+                const data = await response.json();
                 allWorks = data.works || [];
                 
-                document.getElementById('total-works').textContent = allWorks.length;
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
+                updateStats();
+                showContent();
+                renderWorks();
                 
-                filterByCategory(currentCategory);
+                // Cargar categorías después de los trabajos
                 await loadCategories();
             } catch (error) {
                 console.error('Error cargando trabajos:', error);
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('error').textContent = `Error al cargar trabajos: ${error.message}`;
+                showError(`Error al cargar trabajos: ${error.message}. Verifique que la API esté disponible en ${API_URL}`);
             }
         }
 
-        // Filtrar por categoría
-        function filterByCategory(category) {
-            currentCategory = category;
+        // ============================================================================
+        // RENDERIZADO
+        // ============================================================================
+        
+        function renderCategories() {
+            const container = document.getElementById('categories');
+            container.innerHTML = '';
             
-            // Actualizar botones activos
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.remove('active');
+            // Botón "Todos"
+            const allBtn = document.createElement('button');
+            allBtn.className = `filter-btn ${currentCategoryFilter === 'all' ? 'active' : ''}`;
+            allBtn.textContent = '📊 Todos';
+            allBtn.onclick = () => setCategoryFilter('all');
+            container.appendChild(allBtn);
+            
+            // Botones de categorías
+            allCategories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `filter-btn ${currentCategoryFilter === cat.id ? 'active' : ''}`;
+                btn.textContent = `${cat.icon} ${cat.name}`;
+                btn.onclick = () => setCategoryFilter(cat.id);
+                container.appendChild(btn);
             });
-            event.target.classList.add('active');
-            
-            // Filtrar trabajos
-            let filteredWorks = allWorks;
-            if (category !== 'all') {
-                filteredWorks = allWorks.filter(work => work.category === category);
-            }
-            
-            document.getElementById('current-category-count').textContent = filteredWorks.length;
-            renderWorks(filteredWorks);
         }
 
-        // Renderizar trabajos
-        function renderWorks(works) {
-            const grid = document.getElementById('works-grid');
+        function getFilteredWorks() {
+            let filtered = allWorks;
             
-            if (works.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999; padding: 40px;">No hay trabajos en esta categoría</p>';
+            // Filtro por categoría
+            if (currentCategoryFilter !== 'all') {
+                filtered = filtered.filter(work => work.category === currentCategoryFilter);
+            }
+            
+            // Filtro por búsqueda
+            if (currentSearchQuery) {
+                const query = currentSearchQuery.toLowerCase();
+                filtered = filtered.filter(work => {
+                    return (
+                        (work.title && work.title.toLowerCase().includes(query)) ||
+                        (work.work_name && work.work_name.toLowerCase().includes(query)) ||
+                        (work.description && work.description.toLowerCase().includes(query)) ||
+                        (work.short_description && work.short_description.toLowerCase().includes(query)) ||
+                        (work.category_name && work.category_name.toLowerCase().includes(query))
+                    );
+                });
+            }
+            
+            return filtered;
+        }
+
+        function renderWorks() {
+            const grid = document.getElementById('works-grid');
+            const filteredWorks = getFilteredWorks();
+            
+            updateStats(filteredWorks);
+            
+            if (filteredWorks.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">No se encontraron trabajos</div>
+                        <div class="empty-state-subtext">
+                            ${currentSearchQuery ? 'Intenta con otros términos de búsqueda' : 'No hay trabajos disponibles en este momento'}
+                        </div>
+                    </div>
+                `;
                 return;
             }
             
-            grid.innerHTML = works.map(work => `
-                <div class="work-card">
-                    <div class="work-card-header">
-                        <div class="work-card-icon">${work.category_icon}</div>
-                        <div class="work-card-title">${work.title}</div>
-                        <div class="work-card-status">${work.status_badge}</div>
+            grid.innerHTML = filteredWorks.map(work => {
+                const title = work.title || work.work_name || 'Sin título';
+                const description = work.short_description || work.description || 'Sin descripción';
+                const url = work.url || work.work_url || '#';
+                
+                return `
+                    <div class="work-card">
+                        <div class="work-card-header">
+                            <div class="work-card-icon">${work.category_icon || '📊'}</div>
+                            <div class="work-card-title-group">
+                                <div class="work-card-title">${highlightText(title, currentSearchQuery)}</div>
+                                <div class="work-card-status">
+                                    ${work.status_badge || '🟢'} ${(work.status || 'active').toUpperCase()}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="work-card-description">${highlightText(description, currentSearchQuery)}</div>
+                        <div class="work-card-meta">
+                            <div class="work-card-category">
+                                ${work.category_icon || '📊'} ${work.category_name || work.category || ''}
+                            </div>
+                            <div class="work-card-date">${work.created_date || ''}</div>
+                        </div>
+                        <a href="${url}" target="_blank" class="work-card-url" onclick="event.stopPropagation()">
+                            🚀 Ver Trabajo
+                        </a>
                     </div>
-                    <div class="work-card-description">${work.description || 'Sin descripción'}</div>
-                    <div class="work-card-meta">
-                        <span>${work.category_name}</span>
-                        <span>${work.created_date}</span>
-                    </div>
-                    <div class="work-card-url" onclick="window.location.href='${work.url}'">
-                        🚀 Ver Trabajo
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        // Inicializar
+        function updateStats(filteredWorks = null) {
+            const filtered = filteredWorks || getFilteredWorks();
+            const activeWorks = allWorks.filter(w => w.status === 'active').length;
+            
+            document.getElementById('total-works').textContent = allWorks.length;
+            document.getElementById('filtered-works').textContent = filtered.length;
+            document.getElementById('active-works').textContent = activeWorks;
+        }
+
+        // ============================================================================
+        // EVENT HANDLERS
+        // ============================================================================
+        
+        function setCategoryFilter(category) {
+            currentCategoryFilter = category;
+            renderCategories();
+            renderWorks();
+        }
+
+        // Búsqueda con debounce
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            currentSearchQuery = e.target.value.trim();
+            
+            searchTimeout = setTimeout(() => {
+                renderWorks();
+            }, 300); // Esperar 300ms después de que el usuario deje de escribir
+        });
+
+        // ============================================================================
+        // INICIALIZACIÓN
+        // ============================================================================
+        
+        // Cargar trabajos al inicio
         loadWorks();
+        
+        // Recargar cada 5 minutos para obtener actualizaciones
+        setInterval(loadWorks, 5 * 60 * 1000);
     </script>
+
+    <style>
+        mark {
+            background: #fef3c7;
+            color: var(--text);
+            padding: 0.1em 0.2em;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+    </style>
 </body>
 </html>
-
