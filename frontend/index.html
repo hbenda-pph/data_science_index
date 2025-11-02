@@ -13,110 +13,73 @@
         }
 
         :root {
-            /* ============================================
-               PALETA CIENTÍFICA (Consistente con Streamlit)
-               Basado en streamlit_config.py y STYLE_OPTIONS.md
-               ============================================ */
-            --primary: #0066cc;          /* Azul científico */
-            --primary-dark: #0052a3;
-            --primary-light: #3385d6;
-            --secondary: #6c757d;        /* Gris secundario */
-            --accent: #17a2b8;           /* Info/cian */
-            --bg: #fafafa;               /* Fondo tipo paper científico */
-            --bg-dark: #f8f9fa;          /* Sidebar/cards secundarios */
-            --card-bg: #ffffff;          /* Blanco para cards */
-            --text: #212121;             /* Gris muy oscuro (no negro puro) */
-            --text-light: #6c757d;        /* Texto secundario */
-            --border: #e0e0e0;           /* Bordes sutiles */
-            --success: #28a745;          /* Verde científico */
-            --warning: #ffc107;          /* Amarillo científico */
-            --error: #dc3545;            /* Rojo científico */
-            --info: #17a2b8;             /* Cian/info */
-            --shadow: rgba(0, 0, 0, 0.08);
-            --shadow-lg: rgba(0, 0, 0, 0.12);
-            
-            /* Colores adicionales del estilo compartido */
-            --positive: #d4edda;         /* Fondo positivo */
-            --negative: #f8d7da;         /* Fondo negativo */
-            --neutral: #f8f9fa;          /* Fondo neutro */
+            --bg: #ffffff;
+            --sidebar-bg: #f8f9fa;
+            --text: #212529;
+            --text-light: #6c757d;
+            --border: #dee2e6;
+            --primary: #0066cc;
+            --primary-hover: #0052a3;
+            --hover-bg: #e9ecef;
+            --active-bg: #e7f3ff;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         body {
-            /* Tipografía científica - misma que Streamlit */
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-        
-        /* Números monoespaciados para datos (estilo científico) */
-        .stat-value,
-        .work-card-date {
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* Header - Estilo científico sobrio */
-        .header {
-            background: var(--primary);  /* Azul científico sólido, sin gradiente */
-            color: white;
-            padding: 2.5rem 2rem;
-            text-align: center;
-            box-shadow: 0 2px 4px var(--shadow);
-            border-bottom: 3px solid var(--primary-dark);
-        }
-
-        .header h1 {
-            font-size: clamp(2rem, 5vw, 3rem);
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
-        }
-
-        .header p {
-            font-size: clamp(1rem, 2vw, 1.25rem);
-            opacity: 0.95;
-            font-weight: 300;
-        }
-
-        /* Container */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        /* Search and Filters Bar */
-        .controls {
-            background: var(--card-bg);
-            border-radius: 6px;  /* Más sutil */
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px var(--shadow);
-            border: 1px solid var(--border);
+            overflow: hidden;
+            height: 100vh;
             display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
+            flex-direction: column;
+        }
+
+        /* ============================================
+           HEADER FIJO (Siempre visible - tipo Medium)
+           ============================================ */
+        .header {
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
             align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            flex-shrink: 0;
         }
 
-        .search-box {
-            flex: 1;
-            min-width: 250px;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .header-logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-search {
             position: relative;
+            width: 400px;
         }
 
-        .search-box input {
+        .header-search input {
             width: 100%;
-            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
             border: 1px solid var(--border);
-            border-radius: 6px;  /* Más sutil */
-            font-size: 0.95rem;
-            transition: all 0.2s;
-            background: white;
+            border-radius: 4px;
+            font-size: 0.9rem;
         }
 
-        .search-box input:focus {
+        .header-search input:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
@@ -128,349 +91,351 @@
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-light);
-            font-size: 1.25rem;
         }
 
-        .filter-group {
+        .header-right {
             display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border);
-            background: white;
-            border-radius: 6px;  /* Más sutil, menos redondeado */
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .filter-btn:hover {
-            border-color: var(--primary);
-            background: var(--bg-dark);
-        }
-
-        .filter-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        /* Stats */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            align-items: center;
             gap: 1rem;
-            margin-bottom: 2rem;
         }
 
-        .stat-card {
-            background: var(--card-bg);
-            padding: 1.25rem;
-            border-radius: 6px;  /* Más sutil, estilo científico */
-            box-shadow: 0 1px 3px var(--shadow);
-            text-align: center;
-            transition: all 0.2s;
-            border: 1px solid var(--border);  /* Borde sutil como en Streamlit */
-        }
-
-        .stat-card:hover {
-            box-shadow: 0 2px 6px var(--shadow-lg);
-            border-color: var(--primary-light);
-        }
-
-        .stat-value {
-            font-size: 2rem;  /* Más compacto */
-            font-weight: 600;  /* Menos bold */
-            color: var(--primary);
-            margin-bottom: 0.4rem;
-            font-variant-numeric: tabular-nums;  /* Números alineados */
-        }
-
-        .stat-label {
-            color: var(--text-light);
+        .header-stats {
             font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-weight: 500;
+            color: var(--text-light);
         }
 
-        /* Works Grid */
-        .works-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
+        /* ============================================
+           MAIN LAYOUT (Sidebar + Content)
+           ============================================ */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
         }
 
-        .work-card {
-            background: var(--card-bg);
-            border-radius: 6px;  /* Más sutil, estilo científico */
-            padding: 1.25rem;
-            box-shadow: 0 1px 3px var(--shadow);
-            transition: all 0.2s;
-            border: 1px solid var(--border);
+        /* ============================================
+           SIDEBAR FIJO (Tipo Kaggle - Siempre visible)
+           ============================================ */
+        .sidebar {
+            width: 320px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            height: 100%;
         }
 
-        .work-card:hover {
-            box-shadow: 0 3px 8px var(--shadow-lg);
-            border-color: var(--primary);
+        .sidebar-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
         }
 
-        .work-card-header {
+        .sidebar-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-light);
+            margin-bottom: 0.75rem;
+        }
+
+        .category-filter {
             display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
-        .work-card-icon {
-            font-size: 2.5rem;
-            line-height: 1;
+        .category-btn {
+            padding: 0.5rem 0.75rem;
+            border: none;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--text);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .category-btn:hover {
+            background: var(--hover-bg);
+        }
+
+        .category-btn.active {
+            background: var(--active-bg);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .works-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+
+        .work-item {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .work-item:hover {
+            background: var(--hover-bg);
+        }
+
+        .work-item.active {
+            background: var(--active-bg);
+            border-left: 3px solid var(--primary);
+        }
+
+        .work-item-icon {
+            font-size: 1.25rem;
             flex-shrink: 0;
         }
 
-        .work-card-title-group {
+        .work-item-content {
             flex: 1;
             min-width: 0;
         }
 
-        .work-card-title {
-            font-size: 1.1rem;  /* Más compacto, estilo científico */
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 0.3rem;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-
-        .work-card-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;  /* Más sutil */
-            font-size: 0.7rem;
+        .work-item-title {
+            font-size: 0.9rem;
             font-weight: 500;
-            background: var(--bg-dark);
-            color: var(--primary);
-            border: 1px solid var(--border);
+            color: var(--text);
+            margin-bottom: 0.25rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .work-card-description {
+        .work-item-meta {
+            font-size: 0.75rem;
             color: var(--text-light);
-            margin-bottom: 1rem;
-            line-height: 1.6;
-            flex: 1;
-            font-size: 0.95rem;
-        }
-
-        .work-card-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-bottom: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .work-card-category {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .work-card-date {
-            font-size: 0.8rem;
+        .work-item-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 12px;
+            background: var(--hover-bg);
         }
 
-        .work-card-url {
-            padding: 0.625rem 1.25rem;
-            background: var(--primary);  /* Sólido, sin gradiente */
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;  /* Más sutil */
-            text-align: center;
-            font-weight: 500;  /* Menos bold */
-            transition: all 0.2s;
-            display: block;
-            cursor: pointer;
-            border: none;
+        /* ============================================
+           CONTENT AREA (Iframe para trabajos)
+           ============================================ */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        .content-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--sidebar-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .content-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .content-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .content-iframe-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg);
+        }
+
+        .content-iframe {
             width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-light);
+            padding: 3rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-state-text {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .empty-state-subtext {
             font-size: 0.9rem;
         }
 
-        .work-card-url:hover {
-            background: var(--primary-dark);
-            box-shadow: 0 2px 6px rgba(0, 102, 204, 0.25);
-        }
-
-        /* Loading State */
+        /* Loading */
         .loading {
-            text-align: center;
-            padding: 4rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
             color: var(--text-light);
         }
 
         .loading-spinner {
-            display: inline-block;
-            width: 48px;
-            height: 48px;
-            border: 4px solid var(--border);
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin-bottom: 1rem;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        /* Error State */
+        /* Error */
         .error {
-            background: var(--negative);  /* Color del estilo compartido */
-            border: 1px solid var(--error);
-            color: var(--error);
-            padding: 1rem;
-            border-radius: 6px;
-            margin: 1.5rem 0;
-            text-align: center;
+            padding: 1rem 1.5rem;
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 3px solid #dc3545;
+            margin: 1rem;
+            border-radius: 4px;
         }
 
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-light);
-        }
-
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .empty-state-text {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-            color: var(--text);
-        }
-
-        .empty-state-subtext {
-            font-size: 1rem;
-            color: var(--text-light);
-        }
-
-        /* Responsive */
+        /* Responsive (básico) */
         @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
+            .sidebar {
+                width: 280px;
             }
-
-            .header {
-                padding: 2rem 1rem;
-            }
-
-            .controls {
-                flex-direction: column;
-            }
-
-            .search-box {
-                width: 100%;
-            }
-
-            .works-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stats {
-                grid-template-columns: 1fr;
+            .header-search {
+                width: 200px;
             }
         }
 
-        /* Fade in animation */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Scrollbar styling */
+        .sidebar::-webkit-scrollbar,
+        .works-list::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .work-card {
-            animation: fadeIn 0.3s ease-out;
+        .sidebar::-webkit-scrollbar-track,
+        .works-list::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        /* Smooth transitions */
-        * {
-            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: var(--text-light);
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>📊 Data Science Index</h1>
-        <p>Portafolio de Análisis Predictivo y Ciencia de Datos</p>
-    </div>
-
-    <div class="container">
-        <!-- Loading State -->
-        <div id="loading" class="loading">
-            <div class="loading-spinner"></div>
-            <p>Cargando trabajos...</p>
+    <!-- HEADER FIJO (Nunca cambia) -->
+    <header class="header">
+        <div class="header-left">
+            <a href="#" class="header-logo" onclick="resetView(); return false;">
+                <span>📊</span>
+                <span>Data Science Index</span>
+            </a>
+            <div class="header-search">
+                <span class="search-icon">🔍</span>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Buscar trabajos..."
+                    autocomplete="off"
+                >
+            </div>
         </div>
+        <div class="header-right">
+            <div class="header-stats">
+                <span id="stats-text">Cargando...</span>
+            </div>
+        </div>
+    </header>
 
-        <!-- Error State -->
-        <div id="error" class="error" style="display: none;"></div>
-
-        <!-- Main Content -->
-        <div id="content" style="display: none;">
-            <!-- Controls -->
-            <div class="controls">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input 
-                        type="text" 
-                        id="searchInput" 
-                        placeholder="Buscar trabajos por nombre, descripción o categoría..."
-                        autocomplete="off"
-                    >
-                </div>
-                <div class="filter-group" id="categories"></div>
+    <!-- MAIN CONTAINER (Sidebar + Content) -->
+    <div class="main-container">
+        <!-- SIDEBAR FIJO (Siempre visible - tipo Kaggle) -->
+        <aside class="sidebar">
+            <!-- Filtros por Categoría -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">Categorías</div>
+                <div class="category-filter" id="categories"></div>
             </div>
 
-            <!-- Stats -->
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-value" id="total-works">0</div>
-                    <div class="stat-label">Trabajos Totales</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="filtered-works">0</div>
-                    <div class="stat-label">Resultados Mostrados</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="active-works">0</div>
-                    <div class="stat-label">Trabajos Activos</div>
+            <!-- Lista de Trabajos -->
+            <div class="sidebar-section" style="flex: 1; display: flex; flex-direction: column; padding: 0;">
+                <div class="sidebar-section-title" style="padding: 0 1.5rem; padding-top: 1.5rem; padding-bottom: 0.75rem;">Trabajos</div>
+                <div class="works-list" id="works-list">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                    </div>
                 </div>
             </div>
+        </aside>
 
-            <!-- Works Grid -->
-            <div class="works-grid" id="works-grid"></div>
-        </div>
+        <!-- CONTENT AREA (Área central - cambia según trabajo seleccionado) -->
+        <main class="content-area">
+            <div class="content-header" id="content-header" style="display: none;">
+                <div>
+                    <div class="content-title" id="content-title"></div>
+                    <div class="content-subtitle" id="content-subtitle"></div>
+                </div>
+            </div>
+            <div class="content-iframe-container">
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <div class="empty-state-text">Selecciona un trabajo para comenzar</div>
+                    <div class="empty-state-subtext">Elige un trabajo del panel lateral para visualizarlo</div>
+                </div>
+                <iframe 
+                    id="work-iframe" 
+                    class="content-iframe" 
+                    style="display: none;"
+                    allowfullscreen
+                ></iframe>
+            </div>
+        </main>
     </div>
 
     <script>
@@ -479,31 +444,21 @@
         // ============================================================================
         
         function getApiUrl() {
-            // Si está definida globalmente, usarla
-            if (window.API_URL) {
-                return window.API_URL;
-            }
+            if (window.API_URL) return window.API_URL;
             
             const hostname = window.location.hostname;
             const protocol = window.location.protocol;
             const port = window.location.port ? `:${window.location.port}` : '';
             
-            // Si estamos en Cloud Run, construir la URL de la API
             if (hostname.includes('dsi-frontend')) {
-                const apiHostname = hostname.replace('dsi-frontend', 'dsi-api');
-                return `${protocol}//${apiHostname}${port}`;
+                return `${protocol}//${hostname.replace('dsi-frontend', 'dsi-api')}${port}`;
             }
             if (hostname.includes('data-science-index-frontend')) {
-                const apiHostname = hostname.replace('data-science-index-frontend', 'data-science-index-api');
-                return `${protocol}//${apiHostname}${port}`;
+                return `${protocol}//${hostname.replace('data-science-index-frontend', 'data-science-index-api')}${port}`;
             }
-            
-            // Para desarrollo local
             if (hostname === 'localhost' || hostname === '127.0.0.1') {
                 return 'http://localhost:8080';
             }
-            
-            // Fallback: intentar construir desde el dominio actual
             return `${protocol}//${hostname.replace('frontend', 'api')}${port}`;
         }
 
@@ -517,41 +472,7 @@
         let allCategories = [];
         let currentCategoryFilter = 'all';
         let currentSearchQuery = '';
-
-        // ============================================================================
-        // UTILIDADES
-        // ============================================================================
-        
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('error').style.display = 'none';
-            document.getElementById('content').style.display = 'none';
-        }
-
-        function showError(message) {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error').style.display = 'block';
-            document.getElementById('error').textContent = `❌ ${message}`;
-            document.getElementById('content').style.display = 'none';
-        }
-
-        function showContent() {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error').style.display = 'none';
-            document.getElementById('content').style.display = 'block';
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function highlightText(text, query) {
-            if (!query) return escapeHtml(text);
-            const regex = new RegExp(`(${query})`, 'gi');
-            return escapeHtml(text).replace(regex, '<mark>$1</mark>');
-        }
+        let currentWorkId = null;
 
         // ============================================================================
         // CARGAR DATOS
@@ -561,36 +482,30 @@
             try {
                 const response = await fetch(`${API_URL}/categories`);
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
                 const data = await response.json();
                 allCategories = data.categories || [];
-                
                 renderCategories();
             } catch (error) {
                 console.error('Error cargando categorías:', error);
-                // Continuar sin categorías
             }
         }
 
         async function loadWorks() {
-            showLoading();
-            
             try {
                 const response = await fetch(`${API_URL}/works`);
                 if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                
                 const data = await response.json();
                 allWorks = data.works || [];
-                
                 updateStats();
-                showContent();
-                renderWorks();
-                
-                // Cargar categorías después de los trabajos
+                renderWorksList();
                 await loadCategories();
             } catch (error) {
                 console.error('Error cargando trabajos:', error);
-                showError(`Error al cargar trabajos: ${error.message}. Verifique que la API esté disponible en ${API_URL}`);
+                document.getElementById('works-list').innerHTML = `
+                    <div class="error">
+                        ❌ Error al cargar trabajos: ${error.message}
+                    </div>
+                `;
             }
         }
 
@@ -602,18 +517,16 @@
             const container = document.getElementById('categories');
             container.innerHTML = '';
             
-            // Botón "Todos"
             const allBtn = document.createElement('button');
-            allBtn.className = `filter-btn ${currentCategoryFilter === 'all' ? 'active' : ''}`;
+            allBtn.className = `category-btn ${currentCategoryFilter === 'all' ? 'active' : ''}`;
             allBtn.textContent = '📊 Todos';
             allBtn.onclick = () => setCategoryFilter('all');
             container.appendChild(allBtn);
             
-            // Botones de categorías
             allCategories.forEach(cat => {
                 const btn = document.createElement('button');
-                btn.className = `filter-btn ${currentCategoryFilter === cat.id ? 'active' : ''}`;
-                btn.textContent = `${cat.icon} ${cat.name}`;
+                btn.className = `category-btn ${currentCategoryFilter === cat.id ? 'active' : ''}`;
+                btn.innerHTML = `${cat.icon} ${cat.name}`;
                 btn.onclick = () => setCategoryFilter(cat.id);
                 container.appendChild(btn);
             });
@@ -622,12 +535,10 @@
         function getFilteredWorks() {
             let filtered = allWorks;
             
-            // Filtro por categoría
             if (currentCategoryFilter !== 'all') {
                 filtered = filtered.filter(work => work.category === currentCategoryFilter);
             }
             
-            // Filtro por búsqueda
             if (currentSearchQuery) {
                 const query = currentSearchQuery.toLowerCase();
                 filtered = filtered.filter(work => {
@@ -635,7 +546,6 @@
                         (work.title && work.title.toLowerCase().includes(query)) ||
                         (work.work_name && work.work_name.toLowerCase().includes(query)) ||
                         (work.description && work.description.toLowerCase().includes(query)) ||
-                        (work.short_description && work.short_description.toLowerCase().includes(query)) ||
                         (work.category_name && work.category_name.toLowerCase().includes(query))
                     );
                 });
@@ -644,51 +554,37 @@
             return filtered;
         }
 
-        function renderWorks() {
-            const grid = document.getElementById('works-grid');
+        function renderWorksList() {
+            const container = document.getElementById('works-list');
             const filteredWorks = getFilteredWorks();
             
             updateStats(filteredWorks);
             
             if (filteredWorks.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state" style="grid-column: 1/-1;">
-                        <div class="empty-state-icon">🔍</div>
-                        <div class="empty-state-text">No se encontraron trabajos</div>
-                        <div class="empty-state-subtext">
-                            ${currentSearchQuery ? 'Intenta con otros términos de búsqueda' : 'No hay trabajos disponibles en este momento'}
-                        </div>
+                container.innerHTML = `
+                    <div style="padding: 2rem; text-align: center; color: var(--text-light);">
+                        <p>No se encontraron trabajos</p>
                     </div>
                 `;
                 return;
             }
             
-            grid.innerHTML = filteredWorks.map(work => {
+            container.innerHTML = filteredWorks.map(work => {
                 const title = work.title || work.work_name || 'Sin título';
-                const description = work.short_description || work.description || 'Sin descripción';
-                const url = work.url || work.work_url || '#';
+                const isActive = currentWorkId === work.work_id;
                 
                 return `
-                    <div class="work-card">
-                        <div class="work-card-header">
-                            <div class="work-card-icon">${work.category_icon || '📊'}</div>
-                            <div class="work-card-title-group">
-                                <div class="work-card-title">${highlightText(title, currentSearchQuery)}</div>
-                                <div class="work-card-status">
-                                    ${work.status_badge || '🟢'} ${(work.status || 'active').toUpperCase()}
-                                </div>
+                    <div class="work-item ${isActive ? 'active' : ''}" 
+                         onclick="selectWork('${work.work_id}', '${escapeHtml(work.url || work.work_url || '')}', '${escapeHtml(title)}', '${escapeHtml(work.category_name || work.category || '')}')">
+                        <div class="work-item-icon">${work.category_icon || '📊'}</div>
+                        <div class="work-item-content">
+                            <div class="work-item-title">${escapeHtml(title)}</div>
+                            <div class="work-item-meta">
+                                <span>${work.category_name || work.category || ''}</span>
+                                <span>•</span>
+                                <span class="work-item-status">${work.status_badge || '🟢'} ${(work.status || 'active').toUpperCase()}</span>
                             </div>
                         </div>
-                        <div class="work-card-description">${highlightText(description, currentSearchQuery)}</div>
-                        <div class="work-card-meta">
-                            <div class="work-card-category">
-                                ${work.category_icon || '📊'} ${work.category_name || work.category || ''}
-                            </div>
-                            <div class="work-card-date">${work.created_date || ''}</div>
-                        </div>
-                        <a href="${url}" target="_blank" class="work-card-url" onclick="event.stopPropagation()">
-                            🚀 Ver Trabajo
-                        </a>
                     </div>
                 `;
             }).join('');
@@ -698,51 +594,77 @@
             const filtered = filteredWorks || getFilteredWorks();
             const activeWorks = allWorks.filter(w => w.status === 'active').length;
             
-            document.getElementById('total-works').textContent = allWorks.length;
-            document.getElementById('filtered-works').textContent = filtered.length;
-            document.getElementById('active-works').textContent = activeWorks;
+            const statsText = `${filtered.length} de ${allWorks.length} trabajos`;
+            document.getElementById('stats-text').textContent = statsText;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // ============================================================================
-        // EVENT HANDLERS
+        // SELECCIÓN DE TRABAJO
+        // ============================================================================
+        
+        function selectWork(workId, workUrl, workTitle, categoryName) {
+            if (!workUrl || workUrl === '#') {
+                alert('Este trabajo no tiene URL configurada');
+                return;
+            }
+            
+            currentWorkId = workId;
+            
+            // Actualizar UI
+            renderWorksList(); // Para marcar como activo
+            
+            // Mostrar header del contenido
+            document.getElementById('content-header').style.display = 'flex';
+            document.getElementById('content-title').textContent = workTitle;
+            document.getElementById('content-subtitle').textContent = `${categoryName} • ${workId}`;
+            
+            // Ocultar empty state y mostrar iframe
+            document.getElementById('empty-state').style.display = 'none';
+            const iframe = document.getElementById('work-iframe');
+            iframe.style.display = 'block';
+            iframe.src = workUrl;
+        }
+
+        function resetView() {
+            currentWorkId = null;
+            document.getElementById('content-header').style.display = 'none';
+            document.getElementById('empty-state').style.display = 'flex';
+            document.getElementById('work-iframe').style.display = 'none';
+            document.getElementById('work-iframe').src = '';
+            renderWorksList();
+        }
+
+        // ============================================================================
+        // FILTROS Y BÚSQUEDA
         // ============================================================================
         
         function setCategoryFilter(category) {
             currentCategoryFilter = category;
             renderCategories();
-            renderWorks();
+            renderWorksList();
         }
 
-        // Búsqueda con debounce
         let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
             currentSearchQuery = e.target.value.trim();
-            
             searchTimeout = setTimeout(() => {
-                renderWorks();
-            }, 300); // Esperar 300ms después de que el usuario deje de escribir
+                renderWorksList();
+            }, 300);
         });
 
         // ============================================================================
         // INICIALIZACIÓN
         // ============================================================================
         
-        // Cargar trabajos al inicio
         loadWorks();
-        
-        // Recargar cada 5 minutos para obtener actualizaciones
-        setInterval(loadWorks, 5 * 60 * 1000);
+        setInterval(loadWorks, 5 * 60 * 1000); // Refresh cada 5 minutos
     </script>
-
-    <style>
-        mark {
-            background: #fef3c7;
-            color: var(--text);
-            padding: 0.1em 0.2em;
-            border-radius: 3px;
-            font-weight: 500;
-        }
-    </style>
 </body>
 </html>
