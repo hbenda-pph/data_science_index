@@ -162,6 +162,7 @@
             text-align: center;
             font-weight: 500;
             transition: background 0.3s;
+            cursor: pointer;
         }
 
         .work-card-url:hover {
@@ -362,9 +363,9 @@
                         <span>${work.category_name}</span>
                         <span>${work.created_date}</span>
                     </div>
-                    <a href="${work.url}" class="work-card-url" onclick="event.preventDefault(); window.location.href='${work.url}';">
+                    <div class="work-card-url" onclick="window.location.href='${work.url}'">
                         🚀 Ver Trabajo
-                    </a>
+                    </div>
                 </div>
             `).join('');
         }
