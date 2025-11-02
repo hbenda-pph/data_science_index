@@ -569,13 +569,17 @@
                 return;
             }
             
-            container.innerHTML = filteredWorks.map(work => {
+            container.innerHTML = filteredWorks.map((work, index) => {
                 const title = work.title || work.work_name || 'Sin título';
                 const isActive = currentWorkId === work.work_id;
+                const workUrl = work.url || work.work_url || '';
                 
                 return `
                     <div class="work-item ${isActive ? 'active' : ''}" 
-                         onclick="selectWork('${work.work_id}', '${escapeHtml(work.url || work.work_url || '')}', '${escapeHtml(title)}', '${escapeHtml(work.category_name || work.category || '')}')">
+                         data-work-id="${escapeHtml(work.work_id)}"
+                         data-work-url="${escapeHtml(workUrl)}"
+                         data-work-title="${escapeHtml(title)}"
+                         data-work-category="${escapeHtml(work.category_name || work.category || '')}">
                         <div class="work-item-icon">${work.category_icon || '📊'}</div>
                         <div class="work-item-content">
                             <div class="work-item-title">${escapeHtml(title)}</div>
@@ -588,6 +592,19 @@
                     </div>
                 `;
             }).join('');
+            
+            // Agregar event listeners después de renderizar
+            container.querySelectorAll('.work-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const workId = this.getAttribute('data-work-id');
+                    const workUrl = this.getAttribute('data-work-url');
+                    const workTitle = this.getAttribute('data-work-title');
+                    const workCategory = this.getAttribute('data-work-category');
+                    selectWork(workId, workUrl, workTitle, workCategory, e);
+                });
+            });
         }
 
         function updateStats(filteredWorks = null) {
@@ -608,27 +625,49 @@
         // SELECCIÓN DE TRABAJO
         // ============================================================================
         
-        function selectWork(workId, workUrl, workTitle, categoryName) {
-            if (!workUrl || workUrl === '#') {
+        function selectWork(workId, workUrl, workTitle, categoryName, event) {
+            console.log('selectWork called:', { workId, workUrl, workTitle, categoryName });
+            
+            if (!workUrl || workUrl === '' || workUrl === '#') {
                 alert('Este trabajo no tiene URL configurada');
-                return;
+                return false;
+            }
+            
+            // Prevenir navegación si hay evento
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
             }
             
             currentWorkId = workId;
             
-            // Actualizar UI
-            renderWorksList(); // Para marcar como activo
+            // Actualizar UI - marcar como activo
+            document.querySelectorAll('.work-item').forEach(item => {
+                if (item.getAttribute('data-work-id') === workId) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
             
             // Mostrar header del contenido
-            document.getElementById('content-header').style.display = 'flex';
-            document.getElementById('content-title').textContent = workTitle;
-            document.getElementById('content-subtitle').textContent = `${categoryName} • ${workId}`;
+            const contentHeader = document.getElementById('content-header');
+            const contentTitle = document.getElementById('content-title');
+            const contentSubtitle = document.getElementById('content-subtitle');
+            
+            contentHeader.style.display = 'flex';
+            contentTitle.textContent = workTitle;
+            contentSubtitle.textContent = `${categoryName} • ${workId}`;
             
             // Ocultar empty state y mostrar iframe
             document.getElementById('empty-state').style.display = 'none';
             const iframe = document.getElementById('work-iframe');
             iframe.style.display = 'block';
             iframe.src = workUrl;
+            
+            console.log('Iframe src set to:', workUrl);
+            
+            return false;
         }
 
         function resetView() {
