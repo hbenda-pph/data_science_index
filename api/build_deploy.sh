@@ -186,8 +186,7 @@ if gcloud run services describe ${SERVICE_NAME} --region=${REGION} --project=${P
         --min-instances ${MIN_INSTANCES} \
         --concurrency ${CONCURRENCY} \
         --port ${PORT} \
-        --service-account ${SERVICE_ACCOUNT} \
-        --allow-unauthenticated
+        --service-account ${SERVICE_ACCOUNT}
 else
     echo "🆕 Creando nuevo servicio..."
     gcloud run deploy ${SERVICE_NAME} \
