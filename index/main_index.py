@@ -47,17 +47,6 @@ def main():
     # Verificar si se quiere ver un trabajo específico
     query_params = st.query_params
     
-    # Manejar work_url (puede ser string o lista)
-    if "work_url" in query_params:
-        work_url = query_params["work_url"]
-        # Si es lista, tomar el primer elemento
-        if isinstance(work_url, list):
-            work_url = work_url[0] if work_url else None
-        # Si es string vacío, ignorar
-        if work_url:
-            show_external_work(work_url)
-            return
-    
     if "work" in query_params:
         work_id = query_params["work"]
         show_work(work_id)
@@ -236,17 +225,16 @@ def show_works_table(works_df):
                 work_id = work_data["Acción"].replace("work_", "")
                 work_name = work_data["Trabajo"]
                 
-                if st.button(f"Ver {work_name[:20]}...", key=f"table_view_{work_id}"):
-                    # Obtener work_url de la base de datos
-                    try:
-                        db = WorksDatabase()
-                        work_info = db.get_work_by_id(work_id)
-                        if work_info and work_info.get('work_url'):
-                            st.query_params.work_url = work_info['work_url']
-                            st.rerun()
-                        else:
-                            st.error("❌ No se especificó URL para este trabajo")
-                    except Exception as e:
+                # Obtener work_url de la base de datos
+                try:
+                    db = WorksDatabase()
+                    work_info = db.get_work_by_id(work_id)
+                    if work_info and work_info.get('work_url'):
+                        work_url = work_info['work_url']
+                        st.markdown(f'<a href="{work_url}" target="_self" style="display: inline-block; padding: 0.25rem 0.75rem; background-color: #FF4B4B; color: white; text-decoration: none; border-radius: 0.25rem;">Ver {work_name[:20]}...</a>', unsafe_allow_html=True)
+                    else:
+                        st.write("❌ Sin URL")
+                except Exception as e:
                         st.error(f"❌ Error al cargar trabajo: {str(e)}")
 
 def show_work_card_horizontal(work):
@@ -322,14 +310,12 @@ def show_work_card_horizontal(work):
             # Metadatos
             st.markdown(f"**Creado:** {format_date(work['created_date'])}")
             
-        # Botón para ver trabajo
-        if st.button(f"🚀 Ver Trabajo", key=f"view_{work['work_id']}", type="primary"):
-            work_url = work.get('work_url')
-            if work_url:
-                st.query_params.work_url = work_url
-                st.rerun()
-            else:
-                st.error("❌ No se especificó URL para este trabajo")
+        # Link directo para ver trabajo
+        work_url = work.get('work_url')
+        if work_url:
+            st.markdown(f'<a href="{work_url}" target="_self" style="display: inline-block; padding: 0.5rem 1rem; background-color: #FF4B4B; color: white; text-decoration: none; border-radius: 0.25rem; font-weight: 600;">🚀 Ver Trabajo</a>', unsafe_allow_html=True)
+        else:
+            st.error("❌ No se especificó URL para este trabajo")
         
         # Descripción completa del trabajo (si existe)
         if work.get('description'):
@@ -351,63 +337,7 @@ def show_work_card_horizontal(work):
         
         st.markdown("</div>", unsafe_allow_html=True)
 
-def show_external_work(work_url: str):
-    """Mostrar página de redirección a trabajo externo - Sin iframe"""
-    
-    # Validar y limpiar URL
-    if not work_url:
-        st.error("❌ URL vacía o no proporcionada")
-        if st.button("🔙 Volver al Índice"):
-            st.query_params.clear()
-            st.rerun()
-        return
-    
-    # Asegurar que sea string
-    work_url = str(work_url).strip()
-    
-    # Validar formato de URL
-    if not work_url.startswith(('http://', 'https://')):
-        st.error(f"❌ URL inválida (debe comenzar con http:// o https://): {work_url}")
-        if st.button("🔙 Volver al Índice"):
-            st.query_params.clear()
-            st.rerun()
-        return
-    
-    # Decodificar URL si está codificada
-    import urllib.parse
-    try:
-        decoded_url = urllib.parse.unquote(work_url)
-        if decoded_url != work_url:
-            work_url = decoded_url
-    except:
-        pass
-    
-    # Header con botón de regreso
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.markdown("""
-        <div class="external-work-header">
-            <h1>📊 Trabajo de Ciencia de Datos</h1>
-            <p>Haz clic en el botón para acceder al análisis completo</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        if st.button("🔙 Volver al Índice", type="secondary", use_container_width=True):
-            st.query_params.clear()
-            st.rerun()
-    
-    # Redirección inmediata sin mensajes
-    st.markdown(f"""
-    <script>
-        window.location.href = "{work_url}";
-    </script>
-    """, unsafe_allow_html=True)
-    
-    # Información adicional (colapsable)
-    with st.expander("ℹ️ Información del Trabajo"):
-        st.info(f"**URL del trabajo:** {work_url}")
-        st.code(work_url, language=None)
+# Función eliminada - ya no se usa show_external_work
 
 def show_work(work_id: str):
     """Mostrar y ejecutar un trabajo específico"""
