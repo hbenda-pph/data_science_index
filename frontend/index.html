@@ -433,6 +433,8 @@
                     class="content-iframe" 
                     style="display: none;"
                     allowfullscreen
+                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-top-navigation"
+                    loading="eager"
                 ></iframe>
             </div>
         </main>
@@ -660,12 +662,44 @@
             contentSubtitle.textContent = `${categoryName} • ${workId}`;
             
             // Ocultar empty state y mostrar iframe
-            document.getElementById('empty-state').style.display = 'none';
+            const emptyState = document.getElementById('empty-state');
             const iframe = document.getElementById('work-iframe');
-            iframe.style.display = 'block';
-            iframe.src = workUrl;
             
-            console.log('Iframe src set to:', workUrl);
+            emptyState.style.display = 'none';
+            iframe.style.display = 'block';
+            
+            // Limpiar iframe anterior
+            iframe.src = 'about:blank';
+            
+            // Usar setTimeout para asegurar que el iframe esté listo
+            setTimeout(() => {
+                try {
+                    iframe.src = workUrl;
+                    console.log('Iframe src set to:', workUrl);
+                    
+                    // Manejar errores de carga
+                    iframe.onerror = function() {
+                        console.error('Error loading iframe:', workUrl);
+                        emptyState.innerHTML = `
+                            <div class="empty-state-icon">⚠️</div>
+                            <div class="empty-state-text">Error al cargar el trabajo</div>
+                            <div class="empty-state-subtext">No se pudo cargar: ${workTitle}</div>
+                            <button onclick="window.open('${workUrl}', '_blank')" style="margin-top: 1rem; padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                Abrir en nueva pestaña
+                            </button>
+                        `;
+                        emptyState.style.display = 'flex';
+                        iframe.style.display = 'none';
+                    };
+                    
+                    iframe.onload = function() {
+                        console.log('Iframe loaded successfully');
+                    };
+                } catch (err) {
+                    console.error('Error setting iframe src:', err);
+                    alert('Error al cargar el trabajo. Intenta abrirlo en una nueva pestaña.');
+                }
+            }, 100);
             
             return false;
         }
